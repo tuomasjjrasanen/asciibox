@@ -5,7 +5,7 @@
 Render ASCII boxes and arrows as images.
 
 General information
--------------------
+===================
 
 - Version:    0.1
 - License:    GPLv3+ (see COPYING for details)
@@ -14,11 +14,11 @@ General information
 - Code:       <http://github.com/tuomasjjrasanen/asciibox/>
 
 Examples
---------
+========
 
 ::
 
-  cat <<EOF | asciibox -t png > /tmp/asciibox.png
+  cat <<EOF | python asciibox.py > /tmp/asciibox.png
   +---------------------+
   |                     |
   +--------------+------+

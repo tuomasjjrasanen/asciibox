@@ -43,6 +43,7 @@ from __future__ import absolute_import
 import sys
 import Image
 import ImageDraw
+import ImageFont
 
 VERSION = "0.1"
 
@@ -51,11 +52,16 @@ class RasterCanvas:
     def __init__(self, size,
                  bgcolor="#ffffff",
                  fgcolor="#000000",
-                 scale=5):
+                 scale=8,
+                 ttf_font_filepath="/usr/share/fonts/truetype/ttf-dejavu/DejaVuSansMono.ttf"):
         self.__fgcolor = fgcolor
         self.__scale = scale
         self.__img = Image.new("RGB", [scale * v for v in size], bgcolor)
         self.__imgdraw = ImageDraw.Draw(self.__img)
+        try:
+            self.__font = ImageFont.truetype(ttf_font_filepath, scale * 2)
+        except IOError:
+            self.__font = ImageFont.load_default()
 
     def write(self, outfile, outformat="png"):
         """Write image to an open file."""
@@ -68,6 +74,14 @@ class RasterCanvas:
         """
         line = [self.__scale * v for v in line]
         self.__imgdraw.line(line, fill=self.__fgcolor)
+
+    def draw_text(self, pos, text):
+        """Draw character to the image.
+
+        pos  - (x, y)
+        """
+        pos = [self.__scale * v for v in pos]
+        self.__imgdraw.text(pos, text, font=self.__font, fill=self.__fgcolor)
 
 class TextRect:
 
@@ -105,6 +119,7 @@ class Figure:
 
     def __init__(self, text):
 
+        chars = []
         lines = []
 
         textrect = TextRect(text)
@@ -144,9 +159,14 @@ class Figure:
                     lines.append((x + 1, y + 1, x + 1, y + 2))
                 if up_char == '|':
                     lines.append((x + 1, y + 1, x + 1, y + 0))
+            elif char == ' ':
+                pass
+            else:
+                chars.append(((x, y), char))
 
         self.__size = [2 * v for v in textrect.size]
         self.__lines = lines
+        self.__chars = chars
 
     @property
     def size(self):
@@ -155,6 +175,8 @@ class Figure:
     def draw(self, canvas):
         for line in self.__lines:
             canvas.draw_line(line)
+        for pos, char in self.__chars:
+            canvas.draw_text(pos, char)
 
 def _main():
     text = sys.stdin.read()
