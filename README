@@ -16,9 +16,9 @@ General information
 Examples
 ========
 
-::
+Simple command line usage::
 
-  cat <<EOF | python asciibox.py > /tmp/asciibox.png
+  cat <<EOF | python asciibox.py -o /tmp/asciibox.png
   +---------------------+
   |                     |
   +--------------+------+

@@ -15,7 +15,30 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Render ASCII boxes and arrows as images.
+from __future__ import division
+from __future__ import absolute_import
+
+import codecs
+import optparse
+import os.path
+import sys
+import Image
+import ImageDraw
+import ImageFont
+
+VERSION = "0.1"
+_DESCRIPTION = "Render ASCII boxes and arrows as images."
+_AUTHOR = "Tuomas Jorma Juhani Räsänen"
+_EMAIL = "tuomasjjrasanen@tjjr.fi"
+_LONG_VERSION = """asciibox %s
+Copyright (C) 2011 %s
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+
+Written by %s.""" % (VERSION, _AUTHOR, _AUTHOR)
+
+__doc__ = """%s
 
 >>> text = '''
 ... +---------------------+
@@ -35,17 +58,7 @@
 >>> canvas = asciibox.RasterCanvas(figure.size)
 >>> figure.draw(canvas)
 >>> canvas.write(open("/tmp/asciibox.png", "wb"), "png")
-"""
-
-from __future__ import division
-from __future__ import absolute_import
-
-import sys
-import Image
-import ImageDraw
-import ImageFont
-
-VERSION = "0.1"
+""" % _DESCRIPTION
 
 class RasterCanvas:
 
@@ -63,7 +76,7 @@ class RasterCanvas:
         except IOError:
             self.__font = ImageFont.load_default()
 
-    def write(self, outfile, outformat="png"):
+    def write(self, outfile, outformat):
         """Write image to an open file."""
         self.__img.save(outfile, outformat)
 
@@ -178,12 +191,55 @@ class Figure:
         for pos, char in self.__chars:
             canvas.draw_text(pos, char)
 
+def _parse_args(argv):
+    parser = optparse.OptionParser(version=_LONG_VERSION,
+                                   description=_DESCRIPTION)
+
+    format_choices = ["png", "dfd"]
+    format_choices_str = ", ".join([repr(s) for s in format_choices])
+
+    parser.add_option("-i", metavar="FILE", dest="infile", default=None,
+                      help="input text file, defaults to standard input")
+    parser.add_option("-o", metavar="FILE", dest="outfile", default=None,
+                      help="output image file, defaults to standard output")
+    parser.add_option("-t", metavar="FORMAT", dest="format", type="choice",
+                      choices=format_choices, default=None,
+                      help="output image format (choose from %s)" % format_choices_str)
+
+    options, args = parser.parse_args(argv)
+
+    if len(args) > 1:
+        parser.error("encountered extra arguments")
+
+    if options.infile is None:
+        options.infile = sys.stdin
+    else:
+        options.infile = codecs.open(options.infile,
+                                     encoding=sys.stdin.encoding)
+
+    if options.outfile is None:
+        if options.format is None:
+            options.format = format_choices[0]
+        options.outfile = sys.stdout
+    else:
+        if options.format is None:
+            ext = os.path.splitext(options.outfile)[1]
+            options.format = ext[len(os.path.extsep):]
+        options.outfile = open(options.outfile, "wb")
+
+    if options.format not in format_choices:
+        parser.error("invalid output image format: %r (choose from %s)"
+                     % (options.format, format_choices_str))
+
+    return options
+
 def _main():
-    text = sys.stdin.read()
+    options = _parse_args(sys.argv)
+    text = unicode(options.infile.read())
     figure = Figure(text)
     canvas = RasterCanvas(figure.size)
     figure.draw(canvas)
-    canvas.write(sys.stdout)
+    canvas.write(options.outfile, options.format)
 
 if __name__ == "__main__":
     _main()
