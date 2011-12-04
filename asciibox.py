@@ -83,7 +83,7 @@ class RasterCanvas:
         pos = [self.__scale * v for v in pos]
         self.__imgdraw.text(pos, text, font=self.__font, fill=self.__fgcolor)
 
-class TextRect:
+class _TextRect:
 
     def __init__(self, text):
         lines = []
@@ -122,7 +122,7 @@ class Figure:
         chars = []
         lines = []
 
-        textrect = TextRect(text)
+        textrect = _TextRect(text)
 
         for i, j, char in textrect:
             right_char = textrect.get(i + 1, j)
