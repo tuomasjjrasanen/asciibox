@@ -2,7 +2,7 @@
  How To Install
 ================
 
-Just run::
+Just run
 
   python setup.py install
 
