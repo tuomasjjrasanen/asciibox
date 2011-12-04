@@ -1,0 +1,33 @@
+===========
+ ASCII Box
+===========
+
+Render ASCII boxes and arrows as images.
+
+General information
+-------------------
+
+- Version:    0.1
+- License:    GPLv3+ (see COPYING for details)
+- Author:     Tuomas Jorma Juhani Räsänen <tuomasjjrasanen@tjjr.fi>
+- Homepage:   <http://tjjr.fi/software/asciibox/>
+- Code:       <http://github.com/tuomasjjrasanen/asciibox/>
+
+Examples
+--------
+
+::
+
+  cat <<EOF | asciibox -t png > /tmp/asciibox.png
+  +---------------------+
+  |                     |
+  +--------------+------+
+  |              |      |
+  |      +-------+      |
+  |      |       |      |
+  +------+--+----+------+
+     ^      |
+     |      |
+     |      |
+     +------+
+  EOF

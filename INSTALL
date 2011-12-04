@@ -1,0 +1,13 @@
+================
+ How To Install
+================
+
+Just run::
+
+  python setup.py install
+
+Requirements
+------------
+
+- Python 2.5 or newer
+- `Python Imaging Library <http://www.pythonware.com/products/pil/>`__
