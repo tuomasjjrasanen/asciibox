@@ -16,18 +16,23 @@ General information
 Examples
 ========
 
-Simple command line usage::
+Command line usage
+------------------
 
-  cat <<EOF | python asciibox.py -o /tmp/asciibox.png
-  +---------------------+
-  |                     |
-  +--------------+------+
-  |              |      |
-  |      +-------+      |
-  |      |       |      |
-  +------+--+----+------+
-     ^      |
-     |      |
-     |      |
-     +------+
-  EOF
+Given following text file, ``doc/examples/fig.txt``::
+
+  +---------------------+ ^
+  |      Top layer      | |
+  +--------------+------+ |
+  |  Middle      |      | |
+  |      +-------+ Side | |
+  |      | Small |      | |
+  +------+--+----+------+ v
+
+  <--------------------->
+
+Then running::
+
+  python asciibox.py -i doc/examples/fig.txt -o fig.png
+
+would render the above diagram as PNG file, ``fig.png``.
