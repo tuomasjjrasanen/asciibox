@@ -195,7 +195,7 @@ def _parse_args(argv):
     parser = optparse.OptionParser(version=_LONG_VERSION,
                                    description=_DESCRIPTION)
 
-    format_choices = ["png", "dfd"]
+    format_choices = ["png"]
     format_choices_str = ", ".join([repr(s) for s in format_choices])
 
     parser.add_option("-i", metavar="FILE", dest="infile", default=None,
