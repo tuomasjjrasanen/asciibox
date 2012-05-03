@@ -30,3 +30,5 @@ Then running::
   python asciibox.py -i doc/examples/fig.txt -o fig.png
 
 would render the above diagram as a PNG file, ``fig.png``.
+
+.. image:: doc/examples/fig.png
