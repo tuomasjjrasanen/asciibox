@@ -191,19 +191,21 @@ class Figure:
         for pos, char in self.__chars:
             canvas.draw_text(pos, char)
 
+IMAGE_FORMATS = ["png"]
+
 def _parse_args(argv):
     parser = optparse.OptionParser(version=_LONG_VERSION,
                                    description=_DESCRIPTION)
 
-    format_choices = ["png"]
-    format_choices_str = ", ".join([repr(s) for s in format_choices])
+
+    format_choices_str = ", ".join([repr(s) for s in IMAGE_FORMATS])
 
     parser.add_option("-i", metavar="FILE", dest="infile", default=None,
                       help="input text file, defaults to standard input")
     parser.add_option("-o", metavar="FILE", dest="outfile", default=None,
                       help="output image file, defaults to standard output")
     parser.add_option("-t", metavar="FORMAT", dest="format", type="choice",
-                      choices=format_choices, default=None,
+                      choices=IMAGE_FORMATS, default=None,
                       help="output image format (choose from %s)" % format_choices_str)
 
     options, args = parser.parse_args(argv)
@@ -219,7 +221,7 @@ def _parse_args(argv):
 
     if options.outfile is None:
         if options.format is None:
-            options.format = format_choices[0]
+            options.format = IMAGE_FORMATS[0]
         options.outfile = sys.stdout
     else:
         if options.format is None:
@@ -227,19 +229,31 @@ def _parse_args(argv):
             options.format = ext[len(os.path.extsep):]
         options.outfile = open(options.outfile, "wb")
 
-    if options.format not in format_choices:
+    if options.format not in IMAGE_FORMATS:
         parser.error("invalid output image format: %r (choose from %s)"
                      % (options.format, format_choices_str))
 
     return options
 
-def _main():
-    options = _parse_args(sys.argv)
-    text = unicode(options.infile.read())
+def render_to_file(text, image_file, image_format):
     figure = Figure(text)
     canvas = RasterCanvas(figure.size)
     figure.draw(canvas)
-    canvas.write(options.outfile, options.format)
+    canvas.write(image_file, image_format)
+
+def render_to_filename(text, filename, image_format=None):
+    with open(filename, "wb") as image_file:
+        if image_format is None:
+            image_format = os.path.splitext(filename)[1].lstrip(os.path.extsep)
+            if not image_format:
+                image_format = IMAGE_FORMATS[0]
+
+        render_to_file(text, image_file, image_format)
+
+def _main():
+    options = _parse_args(sys.argv)
+    text = unicode(options.infile.read())
+    render_to_file(text, options.outfile, options.format)
 
 if __name__ == "__main__":
     _main()
