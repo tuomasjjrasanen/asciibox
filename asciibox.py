@@ -235,20 +235,20 @@ def _parse_args(argv):
 
     return options
 
-def render_to_file(text, image_file, image_format):
+def render_to_file(text, image_file, image_format, **kwargs):
     figure = Figure(text)
-    canvas = RasterCanvas(figure.size)
+    canvas = RasterCanvas(figure.size, **kwargs)
     figure.draw(canvas)
     canvas.write(image_file, image_format)
 
-def render_to_filename(text, filename, image_format=None):
+def render_to_filename(text, filename, image_format=None, **kwargs):
     with open(filename, "wb") as image_file:
         if image_format is None:
             image_format = os.path.splitext(filename)[1].lstrip(os.path.extsep)
             if not image_format:
                 image_format = IMAGE_FORMATS[0]
 
-        render_to_file(text, image_file, image_format)
+        render_to_file(text, image_file, image_format, **kwargs)
 
 def _main():
     options = _parse_args(sys.argv)
