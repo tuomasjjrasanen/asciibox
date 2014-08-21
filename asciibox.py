@@ -36,7 +36,7 @@ License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
 This is free software: you are free to change and redistribute it.
 There is NO WARRANTY, to the extent permitted by law.
 
-Written by %s.""" % (VERSION, _AUTHOR, _AUTHOR)
+Written by %s <%s>.""" % (VERSION, _AUTHOR, _AUTHOR, _EMAIL)
 
 __doc__ = """%s
 
@@ -55,7 +55,9 @@ __doc__ = """%s
 ... '''
 >>> import asciibox
 >>> asciibox.render_to_filename(text, "/tmp/asciibox.png")
-""" % _DESCRIPTION
+
+%s
+""" % (_DESCRIPTION, _LONG_VERSION)
 
 class _RasterCanvas:
 
