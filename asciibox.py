@@ -54,13 +54,10 @@ __doc__ = """%s
 ...    +------+
 ... '''
 >>> import asciibox
->>> figure = asciibox.Figure(text)
->>> canvas = asciibox.RasterCanvas(figure.size)
->>> figure.draw(canvas)
->>> canvas.write(open("/tmp/asciibox.png", "wb"), "png")
+>>> asciibox.render_to_filename(text, "/tmp/asciibox.png")
 """ % _DESCRIPTION
 
-class RasterCanvas:
+class _RasterCanvas:
 
     def __init__(self, size,
                  bgcolor="#ffffff",
@@ -128,7 +125,7 @@ class _TextRect:
                 char = self.get(x, y)
                 yield x, y, char
 
-class Figure:
+class _Figure:
 
     def __init__(self, text):
 
@@ -236,8 +233,8 @@ def _parse_args(argv):
     return options
 
 def render_to_file(text, image_file, image_format, **kwargs):
-    figure = Figure(text)
-    canvas = RasterCanvas(figure.size, **kwargs)
+    figure = _Figure(text)
+    canvas = _RasterCanvas(figure.size, **kwargs)
     figure.draw(canvas)
     canvas.write(image_file, image_format)
 
