@@ -59,17 +59,13 @@ __doc__ = """%s
 
 class _RasterCanvas:
 
-    def __init__(self, size,
-                 bgcolor="#ffffff",
-                 fgcolor="#000000",
-                 scale=8,
-                 ttf_font_filepath="/usr/share/fonts/truetype/ttf-dejavu/DejaVuSansMono.ttf"):
-        self.__fgcolor = fgcolor
-        self.__scale = scale
-        self.__img = Image.new("RGB", [scale * v for v in size], bgcolor)
+    def __init__(self, size):
+        self.__fgcolor = "#000000"
+        self.__scale = 8
+        self.__img = Image.new("RGB", [self.__scale * v for v in size], "#ffffff")
         self.__imgdraw = ImageDraw.Draw(self.__img)
         try:
-            self.__font = ImageFont.truetype(ttf_font_filepath, scale * 2)
+            self.__font = ImageFont.truetype("/usr/share/fonts/truetype/ttf-dejavu/DejaVuSansMono.ttf", self.__scale * 2)
         except IOError:
             self.__font = ImageFont.load_default()
 
@@ -232,20 +228,20 @@ def _parse_args(argv):
 
     return options
 
-def render_to_file(text, image_file, image_format, **kwargs):
+def render_to_file(text, image_file, image_format):
     figure = _Figure(text)
-    canvas = _RasterCanvas(figure.size, **kwargs)
+    canvas = _RasterCanvas(figure.size)
     figure.draw(canvas)
     canvas.write(image_file, image_format)
 
-def render_to_filename(text, filename, image_format=None, **kwargs):
+def render_to_filename(text, filename, image_format=None):
     with open(filename, "wb") as image_file:
         if image_format is None:
             image_format = os.path.splitext(filename)[1].lstrip(os.path.extsep)
             if not image_format:
                 image_format = IMAGE_FORMATS[0]
 
-        render_to_file(text, image_file, image_format, **kwargs)
+        render_to_file(text, image_file, image_format)
 
 def _main():
     options = _parse_args(sys.argv)
