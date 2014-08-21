@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Copyright © 2011 Tuomas Jorma Juhani Räsänen
+# Copyright © 2014 Tuomas Räsänen
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,10 +28,10 @@ import ImageFont
 
 VERSION = "0.1"
 _DESCRIPTION = "Render ASCII boxes and arrows as images."
-_AUTHOR = "Tuomas Jorma Juhani Räsänen"
+_AUTHOR = "Tuomas Räsänen"
 _EMAIL = "tuomasjjrasanen@tjjr.fi"
 _LONG_VERSION = """asciibox %s
-Copyright (C) 2011 %s
+Copyright (C) 2014 %s
 License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
 This is free software: you are free to change and redistribute it.
 There is NO WARRANTY, to the extent permitted by law.
