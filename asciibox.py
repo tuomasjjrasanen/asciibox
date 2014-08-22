@@ -84,6 +84,24 @@ class _CairoCanvas(object):
         self.__ctx.move_to(x, y)
         self.__ctx.show_layout(layout)
 
+class _VectorCairoCanvas(_CairoCanvas):
+
+    def __init__(self, size, scale=(8, 8)):
+        scale_x, scale_y = scale
+        width, height = size
+        self.__imgfile = os.tmpfile()
+        self.__surface = cairo.SVGSurface(self.__imgfile, width * scale_x, height * scale_y)
+        _CairoCanvas.__init__(self, self.__surface, scale)
+
+    def write(self, outfile):
+        self.__surface.finish()
+        self.__imgfile.seek(0)
+        while True:
+            data = self.__imgfile.read(1024)
+            if not data:
+                break
+            outfile.write(data)
+
 class _RasterCairoCanvas(_CairoCanvas):
 
     def __init__(self, size, scale=(8, 8)):
@@ -192,6 +210,7 @@ class _Figure:
 
 IMAGE_FORMATS = {
     "png": _RasterCairoCanvas,
+    "svg": _VectorCairoCanvas,
     }
 
 def _parse_args(argv):
