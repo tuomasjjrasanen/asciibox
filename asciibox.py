@@ -79,9 +79,7 @@ def _draw_text(context, text, font_description):
     context.move_to(x, y)
     context.show_layout(layout)
 
-def _render_surface(ascii_figure, surface, scale):
-    scale_x, scale_y = scale
-
+def _render_surface(ascii_figure, surface, scale_x, scale_y):
     context = pangocairo.CairoContext(cairo.Context(surface))
     context.set_line_width(0.25)
     context.scale(scale_x, scale_y)
@@ -93,21 +91,19 @@ def _render_surface(ascii_figure, surface, scale):
     for text in ascii_figure.texts:
         _draw_text(context, text, font_description)
 
-def _render_svg(ascii_figure, image_file, scale=(8, 8)):
-    width, height = ascii_figure.size
-    scale_x, scale_y = scale
-
-    surface = cairo.SVGSurface(image_file, width * scale_x, height * scale_y)
-    _render_surface(ascii_figure, surface, scale)
+def _render_svg(ascii_figure, image_file, scale_x=8, scale_y=8):
+    surface = cairo.SVGSurface(image_file,
+                               ascii_figure.width * scale_x,
+                               ascii_figure.height * scale_y)
+    _render_surface(ascii_figure, surface, scale_x, scale_y)
 
     surface.finish()
 
-def _render_png(ascii_figure, image_file, scale=(8, 8)):
-    width, height = ascii_figure.size
-    scale_x, scale_y = scale
-
-    surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, width * scale_x, height * scale_y)
-    _render_surface(ascii_figure, surface, scale)
+def _render_png(ascii_figure, image_file, scale_x=8, scale_y=8):
+    surface = cairo.ImageSurface(cairo.FORMAT_ARGB32,
+                                 ascii_figure.width * scale_x,
+                                 ascii_figure.height * scale_y)
+    _render_surface(ascii_figure, surface, scale_x, scale_y)
 
     surface.write_to_png(image_file)
 
@@ -123,23 +119,26 @@ class _TextRect:
             width = max(len(line), width)
             height += 1
         self.__text = "".join([l.ljust(width) for l in lines])
-        self.__size = (width, height)
+        self.__width = width
+        self.__height = height
 
     @property
-    def size(self):
-        return self.__size
+    def width(self):
+        return self.__width
+
+    @property
+    def height(self):
+        return self.__height
 
     def get(self, x, y):
-        width, height = self.__size
-        if 0 <= x < width and 0 <= y < height:
-            i = y * width + x
+        if 0 <= x < self.__width and 0 <= y < self.__height:
+            i = y * self.__width + x
             return self.__text[i]
         return ""
 
     def __iter__(self):
-        width, height = self.__size
-        for y in range(height):
-            for x in range(width):
+        for y in range(self.__height):
+            for x in range(self.__width):
                 char = self.get(x, y)
                 yield x, y, char
 
@@ -192,13 +191,18 @@ class _Figure:
             else:
                 texts.append(((x, y), char))
 
-        self.__size = [2 * v for v in textrect.size]
+        self.__width = 2 * textrect.width
+        self.__height = 2 * textrect.height
         self.__lines = lines
         self.__texts = texts
 
     @property
-    def size(self):
-        return self.__size
+    def width(self):
+        return self.__width
+
+    @property
+    def height(self):
+        return self.__height
 
     @property
     def lines(self):
