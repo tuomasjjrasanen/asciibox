@@ -91,21 +91,21 @@ def _render_surface(ascii_figure, surface, scale_x, scale_y):
     for text in ascii_figure.texts:
         _draw_text(context, text, font_description)
 
-def _render_svg(ascii_figure, image_file, scale_x=8, scale_y=8):
-    surface = cairo.SVGSurface(image_file,
+def _render_svg(ascii_figure, output_file, scale_x=8, scale_y=8):
+    surface = cairo.SVGSurface(output_file,
                                ascii_figure.width * scale_x,
                                ascii_figure.height * scale_y)
     _render_surface(ascii_figure, surface, scale_x, scale_y)
 
     surface.finish()
 
-def _render_png(ascii_figure, image_file, scale_x=8, scale_y=8):
+def _render_png(ascii_figure, output_file, scale_x=8, scale_y=8):
     surface = cairo.ImageSurface(cairo.FORMAT_ARGB32,
                                  ascii_figure.width * scale_x,
                                  ascii_figure.height * scale_y)
     _render_surface(ascii_figure, surface, scale_x, scale_y)
 
-    surface.write_to_png(image_file)
+    surface.write_to_png(output_file)
 
 class _TextRect:
 
@@ -226,55 +226,55 @@ def _parse_args(argv):
 
     format_choices_str = ", ".join([repr(s) for s in OUTPUT_FORMATS])
 
-    parser.add_option("-i", metavar="FILE", dest="infile", default=None,
-                      help="input text file, defaults to standard input")
-    parser.add_option("-o", metavar="FILE", dest="outfile", default=None,
-                      help="output image file, defaults to standard output")
-    parser.add_option("-t", metavar="FORMAT", dest="format", type="choice",
+    parser.add_option("-i", "--input-file", metavar="FILE", default=None,
+                      help="input file, defaults to standard input")
+    parser.add_option("-o", "--output-file", metavar="FILE", default=None,
+                      help="output file, defaults to standard output")
+    parser.add_option("-t", "--output-format", metavar="FORMAT", dest="format", type="choice",
                       choices=OUTPUT_FORMATS, default=None,
-                      help="output image format (choose from %s)" % format_choices_str)
+                      help="output format (choose from %s)" % format_choices_str)
 
     options, args = parser.parse_args(argv)
 
     if len(args) > 1:
         parser.error("encountered extra arguments")
 
-    if options.infile is None:
-        options.infile = sys.stdin
+    if options.input_file is None:
+        options.input_file = sys.stdin
     else:
-        options.infile = codecs.open(options.infile,
-                                     encoding=sys.stdin.encoding)
+        options.input_file = codecs.open(options.input_file,
+                                         encoding=sys.stdin.encoding)
 
-    if options.outfile is None:
-        options.outfile = sys.stdout
+    if options.output_file is None:
+        options.output_file = sys.stdout
 
     if options.format is not None:
         render_options["output_format"] = options.format
 
     return options, render_options
 
-def _render(ascii_text, image_file, **kwargs):
+def _render(ascii_text, output_file, **kwargs):
     output_format = kwargs.get("output_format", "png")
     try:
         render_function = _RENDER_FUNCTIONS[output_format]
     except KeyError:
         raise Error("invalid output format", output_format)
     ascii_figure = _Figure(ascii_text)
-    render_function(ascii_figure, image_file)
+    render_function(ascii_figure, output_file)
 
-def render(ascii_text, image_file, **kwargs):
-    if isinstance(image_file, (str, unicode)):
+def render(ascii_text, output_file, **kwargs):
+    if isinstance(output_file, (str, unicode)):
         kwargs.setdefault("output_format",
-                          os.path.splitext(image_file)[1].lstrip(os.path.extsep))
-        with open(image_file, "wb") as f:
+                          os.path.splitext(output_file)[1].lstrip(os.path.extsep))
+        with open(output_file, "wb") as f:
             _render(ascii_text, f, **kwargs)
 
-    _render(ascii_text, image_file, **kwargs)
+    _render(ascii_text, output_file, **kwargs)
 
 def _main():
     options, render_options = _parse_args(sys.argv)
-    text = unicode(options.infile.read())
-    render(text, options.outfile, **render_options)
+    text = unicode(options.input_file.read())
+    render(text, options.output_file, **render_options)
 
 if __name__ == "__main__":
     _main()
