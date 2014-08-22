@@ -266,7 +266,7 @@ def _parse_args(argv):
     return options, render_options
 
 def _render(text, output_file, **kwargs):
-    output_format = kwargs.get("output_format", None)
+    output_format = kwargs.pop("output_format", None)
     try:
         render_function = _RENDER_FUNCTIONS[output_format]
     except KeyError:
