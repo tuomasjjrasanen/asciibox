@@ -30,7 +30,7 @@ import cairo
 import pango
 import pangocairo
 
-VERSION = "0.1"
+VERSION = "0.2"
 _DESCRIPTION = "Render ASCII boxes and arrows as images."
 _AUTHOR = "Tuomas Räsänen"
 _EMAIL = "tuomasjjrasanen@tjjr.fi"
