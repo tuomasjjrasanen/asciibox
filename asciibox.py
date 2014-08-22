@@ -20,11 +20,13 @@ from __future__ import absolute_import
 
 import codecs
 import optparse
+import os
 import os.path
 import sys
-import Image
-import ImageDraw
-import ImageFont
+
+import cairo
+import pango
+import pangocairo
 
 VERSION = "0.1"
 _DESCRIPTION = "Render ASCII boxes and arrows as images."
@@ -59,37 +61,39 @@ __doc__ = """%s
 %s
 """ % (_DESCRIPTION, _LONG_VERSION)
 
-class _RasterCanvas:
+class _CairoCanvas(object):
 
-    def __init__(self, size):
-        self.__fgcolor = "#000000"
-        self.__scale = 8
-        self.__img = Image.new("RGB", [self.__scale * v for v in size], "#ffffff")
-        self.__imgdraw = ImageDraw.Draw(self.__img)
-        try:
-            self.__font = ImageFont.truetype("/usr/share/fonts/truetype/ttf-dejavu/DejaVuSansMono.ttf", self.__scale * 2)
-        except IOError:
-            self.__font = ImageFont.load_default()
-
-    def write(self, outfile, outformat):
-        """Write image to an open file."""
-        self.__img.save(outfile, outformat)
+    def __init__(self, surface, scale):
+        scale_x, scale_y = scale
+        self.__ctx = pangocairo.CairoContext(cairo.Context(surface))
+        self.__ctx.set_line_width(0.25)
+        self.__ctx.scale(scale_x, scale_y)
+        self.__font_desc = pango.FontDescription("DejaVuSansMono 1")
 
     def draw_line(self, line):
-        """Draw line to the image.
-
-        line - (x0, y0, x1, y1)
-        """
-        line = [self.__scale * v for v in line]
-        self.__imgdraw.line(line, fill=self.__fgcolor)
+        x0, y0, x1, y1 = line
+        self.__ctx.move_to(x0, y0)
+        self.__ctx.line_to(x1, y1)
+        self.__ctx.stroke()
 
     def draw_text(self, pos, text):
-        """Draw character to the image.
+        layout = self.__ctx.create_layout()
+        layout.set_font_description(self.__font_desc)
+        layout.set_text(text)
+        x, y = pos
+        self.__ctx.move_to(x, y)
+        self.__ctx.show_layout(layout)
 
-        pos  - (x, y)
-        """
-        pos = [self.__scale * v for v in pos]
-        self.__imgdraw.text(pos, text, font=self.__font, fill=self.__fgcolor)
+class _RasterCairoCanvas(_CairoCanvas):
+
+    def __init__(self, size, scale=(8, 8)):
+        scale_x, scale_y = scale
+        width, height = size
+        self.__surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, width * scale_x, height * scale_y)
+        _CairoCanvas.__init__(self, self.__surface, scale)
+
+    def write(self, outfile):
+        self.__surface.write_to_png(outfile)
 
 class _TextRect:
 
@@ -186,7 +190,9 @@ class _Figure:
         for pos, char in self.__chars:
             canvas.draw_text(pos, char)
 
-IMAGE_FORMATS = ["png"]
+IMAGE_FORMATS = {
+    "png": _RasterCairoCanvas,
+    }
 
 def _parse_args(argv):
     parser = optparse.OptionParser(version=_LONG_VERSION,
@@ -200,7 +206,7 @@ def _parse_args(argv):
     parser.add_option("-o", metavar="FILE", dest="outfile", default=None,
                       help="output image file, defaults to standard output")
     parser.add_option("-t", metavar="FORMAT", dest="format", type="choice",
-                      choices=IMAGE_FORMATS, default=None,
+                      choices=IMAGE_FORMATS.keys(), default=None,
                       help="output image format (choose from %s)" % format_choices_str)
 
     options, args = parser.parse_args(argv)
@@ -216,7 +222,7 @@ def _parse_args(argv):
 
     if options.outfile is None:
         if options.format is None:
-            options.format = IMAGE_FORMATS[0]
+            options.format = "png"
         options.outfile = sys.stdout
     else:
         if options.format is None:
@@ -232,16 +238,17 @@ def _parse_args(argv):
 
 def render_to_file(text, image_file, image_format):
     figure = _Figure(text)
-    canvas = _RasterCanvas(figure.size)
+    canvas_class = IMAGE_FORMATS[image_format]
+    canvas = canvas_class(figure.size)
     figure.draw(canvas)
-    canvas.write(image_file, image_format)
+    canvas.write(image_file)
 
 def render_to_filename(text, filename, image_format=None):
     with open(filename, "wb") as image_file:
         if image_format is None:
             image_format = os.path.splitext(filename)[1].lstrip(os.path.extsep)
             if not image_format:
-                image_format = IMAGE_FORMATS[0]
+                image_format = "png"
 
         render_to_file(text, image_file, image_format)
 
