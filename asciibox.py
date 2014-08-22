@@ -72,6 +72,8 @@ class OutputFormatError(Error):
         self.output_format = output_format
 
     def __str__(self):
+        if self.output_format is None:
+            return "undefined output format"
         return "invalid output format '%s'" % self.output_format
 
 def _draw_line(context, line):
@@ -264,7 +266,7 @@ def _parse_args(argv):
     return options, render_options
 
 def _render(ascii_text, output_file, **kwargs):
-    output_format = kwargs.get("output_format", "png")
+    output_format = kwargs.get("output_format", None)
     try:
         render_function = _RENDER_FUNCTIONS[output_format]
     except KeyError:
