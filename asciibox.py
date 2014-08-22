@@ -17,6 +17,7 @@
 
 from __future__ import division
 from __future__ import absolute_import
+from __future__ import print_function
 
 import codecs
 import optparse
@@ -286,4 +287,8 @@ def _main():
     render(text, options.output_file, **render_options)
 
 if __name__ == "__main__":
-    _main()
+    try:
+        _main()
+    except Error, e:
+        print("error:", e, file=sys.stderr)
+        sys.exit(1)
