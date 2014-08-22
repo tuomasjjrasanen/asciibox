@@ -91,31 +91,31 @@ def _draw_text(context, text, font_description):
     context.move_to(x, y)
     context.show_layout(layout)
 
-def _render_surface(ascii_figure, surface, scale_x, scale_y):
+def _render_surface(figure, surface, scale_x, scale_y):
     context = pangocairo.CairoContext(cairo.Context(surface))
     context.set_line_width(0.25)
     context.scale(scale_x, scale_y)
     font_description = pango.FontDescription("DejaVuSansMono 1")
 
-    for line in ascii_figure.lines:
+    for line in figure.lines:
         _draw_line(context, line)
 
-    for text in ascii_figure.texts:
+    for text in figure.texts:
         _draw_text(context, text, font_description)
 
-def _render_svg(ascii_figure, output_file, scale_x=8, scale_y=8):
+def _render_svg(figure, output_file, scale_x=8, scale_y=8):
     surface = cairo.SVGSurface(output_file,
-                               ascii_figure.width * scale_x,
-                               ascii_figure.height * scale_y)
-    _render_surface(ascii_figure, surface, scale_x, scale_y)
+                               figure.width * scale_x,
+                               figure.height * scale_y)
+    _render_surface(figure, surface, scale_x, scale_y)
 
     surface.finish()
 
-def _render_png(ascii_figure, output_file, scale_x=8, scale_y=8):
+def _render_png(figure, output_file, scale_x=8, scale_y=8):
     surface = cairo.ImageSurface(cairo.FORMAT_ARGB32,
-                                 ascii_figure.width * scale_x,
-                                 ascii_figure.height * scale_y)
-    _render_surface(ascii_figure, surface, scale_x, scale_y)
+                                 figure.width * scale_x,
+                                 figure.height * scale_y)
+    _render_surface(figure, surface, scale_x, scale_y)
 
     surface.write_to_png(output_file)
 
@@ -265,23 +265,23 @@ def _parse_args(argv):
 
     return options, render_options
 
-def _render(ascii_text, output_file, **kwargs):
+def _render(text, output_file, **kwargs):
     output_format = kwargs.get("output_format", None)
     try:
         render_function = _RENDER_FUNCTIONS[output_format]
     except KeyError:
         raise OutputFormatError(output_format)
-    ascii_figure = _Figure(ascii_text)
-    render_function(ascii_figure, output_file)
+    figure = _Figure(text)
+    render_function(figure, output_file)
 
-def render(ascii_text, output_file, **kwargs):
+def render(text, output_file, **kwargs):
     if isinstance(output_file, (str, unicode)):
         kwargs.setdefault("output_format",
                           os.path.splitext(output_file)[1].lstrip(os.path.extsep))
         with open(output_file, "wb") as f:
-            _render(ascii_text, f, **kwargs)
+            _render(text, f, **kwargs)
 
-    _render(ascii_text, output_file, **kwargs)
+    _render(text, output_file, **kwargs)
 
 def _main():
     options, render_options = _parse_args(sys.argv)
