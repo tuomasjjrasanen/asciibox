@@ -147,7 +147,7 @@ class _Figure:
 
     def __init__(self, text):
 
-        chars = []
+        texts = []
         lines = []
 
         textrect = _TextRect(text)
@@ -190,11 +190,11 @@ class _Figure:
             elif char == ' ':
                 pass
             else:
-                chars.append(((x, y), char))
+                texts.append(((x, y), char))
 
         self.__size = [2 * v for v in textrect.size]
         self.__lines = lines
-        self.__chars = chars
+        self.__texts = texts
 
     @property
     def size(self):
@@ -206,7 +206,7 @@ class _Figure:
 
     @property
     def texts(self):
-        return self.__chars
+        return self.__texts
 
 _RENDER_FUNCTIONS = {
     "png": _render_png,
