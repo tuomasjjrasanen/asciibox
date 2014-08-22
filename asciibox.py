@@ -216,7 +216,7 @@ _RENDER_FUNCTIONS = {
     "png": _render_png,
     "svg": _render_svg,
     }
-IMAGE_FORMATS = _RENDER_FUNCTIONS.keys()
+OUTPUT_FORMATS = _RENDER_FUNCTIONS.keys()
 
 def _parse_args(argv):
     render_options = {}
@@ -224,14 +224,14 @@ def _parse_args(argv):
                                    description=_DESCRIPTION)
 
 
-    format_choices_str = ", ".join([repr(s) for s in IMAGE_FORMATS])
+    format_choices_str = ", ".join([repr(s) for s in OUTPUT_FORMATS])
 
     parser.add_option("-i", metavar="FILE", dest="infile", default=None,
                       help="input text file, defaults to standard input")
     parser.add_option("-o", metavar="FILE", dest="outfile", default=None,
                       help="output image file, defaults to standard output")
     parser.add_option("-t", metavar="FORMAT", dest="format", type="choice",
-                      choices=IMAGE_FORMATS, default=None,
+                      choices=OUTPUT_FORMATS, default=None,
                       help="output image format (choose from %s)" % format_choices_str)
 
     options, args = parser.parse_args(argv)
@@ -249,22 +249,22 @@ def _parse_args(argv):
         options.outfile = sys.stdout
 
     if options.format is not None:
-        render_options["image_format"] = options.format
+        render_options["output_format"] = options.format
 
     return options, render_options
 
 def _render(ascii_text, image_file, **kwargs):
-    image_format = kwargs.get("image_format", "png")
+    output_format = kwargs.get("output_format", "png")
     try:
-        render_function = _RENDER_FUNCTIONS[image_format]
+        render_function = _RENDER_FUNCTIONS[output_format]
     except KeyError:
-        raise Error("invalid output format", image_format)
+        raise Error("invalid output format", output_format)
     ascii_figure = _Figure(ascii_text)
     render_function(ascii_figure, image_file)
 
 def render(ascii_text, image_file, **kwargs):
     if isinstance(image_file, (str, unicode)):
-        kwargs.setdefault("image_format",
+        kwargs.setdefault("output_format",
                           os.path.splitext(image_file)[1].lstrip(os.path.extsep))
         with open(image_file, "wb") as f:
             _render(ascii_text, f, **kwargs)
