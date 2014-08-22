@@ -56,7 +56,7 @@ __doc__ = """%s
 ...    +------+
 ... '''
 >>> import asciibox
->>> asciibox.render_to_filename(text, "/tmp/asciibox.png")
+>>> asciibox.render(text, "/tmp/asciibox.png")
 
 %s
 """ % (_DESCRIPTION, _LONG_VERSION)
@@ -252,24 +252,25 @@ def _parse_args(argv):
 
     return options
 
-def render_to_file(text, image_file, image_format):
-    figure = _Figure(text)
+def _render(ascii_text, image_file, **kwargs):
+    image_format = kwargs.get("image_format", "png")
     render_function = IMAGE_FORMATS[image_format]
-    render_function(image_file, figure)
+    ascii_figure = _Figure(ascii_text)
+    render_function(image_file, ascii_figure)
 
-def render_to_filename(text, filename, image_format=None):
-    with open(filename, "wb") as image_file:
-        if image_format is None:
-            image_format = os.path.splitext(filename)[1].lstrip(os.path.extsep)
-            if not image_format:
-                image_format = "png"
+def render(ascii_text, image_file, **kwargs):
+    if isinstance(image_file, (str, unicode)):
+        kwargs.setdefault("image_format",
+                          os.path.splitext(image_file)[1].lstrip(os.path.extsep))
+        with open(image_file, "wb") as f:
+            _render(ascii_text, f, **kwargs)
 
-        render_to_file(text, image_file, image_format)
+    _render(ascii_text, image_file, **kwargs)
 
 def _main():
     options = _parse_args(sys.argv)
     text = unicode(options.infile.read())
-    render_to_file(text, options.outfile, options.format)
+    render(text, options.outfile, image_format=options.format)
 
 if __name__ == "__main__":
     _main()
