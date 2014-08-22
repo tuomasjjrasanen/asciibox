@@ -242,7 +242,7 @@ def _parse_args(argv):
                       help="input file, defaults to standard input")
     parser.add_option("-o", "--output-file", metavar="FILE", default=None,
                       help="output file, defaults to standard output")
-    parser.add_option("-t", "--output-format", metavar="FORMAT", dest="format", type="choice",
+    parser.add_option("-t", "--output-format", metavar="FORMAT", type="choice",
                       choices=OUTPUT_FORMATS, default=None,
                       help="output format (choose from %s)" % format_choices_str)
 
@@ -260,8 +260,8 @@ def _parse_args(argv):
     if options.output_file is None:
         options.output_file = sys.stdout
 
-    if options.format is not None:
-        render_options["output_format"] = options.format
+    if options.output_format is not None:
+        render_options["output_format"] = options.output_format
 
     return options, render_options
 
