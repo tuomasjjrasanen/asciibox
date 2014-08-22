@@ -239,12 +239,12 @@ def _parse_args(argv):
 
     format_choices_str = ", ".join([repr(s) for s in OUTPUT_FORMATS])
 
-    parser.add_option("-i", "--input-file", metavar="FILE", default=None,
+    parser.add_option("-i", "--input-file", metavar="FILE",
                       help="input file, defaults to standard input")
-    parser.add_option("-o", "--output-file", metavar="FILE", default=None,
+    parser.add_option("-o", "--output-file", metavar="FILE",
                       help="output file, defaults to standard output")
     parser.add_option("-t", "--output-format", metavar="FORMAT", type="choice",
-                      choices=OUTPUT_FORMATS, default=None,
+                      choices=OUTPUT_FORMATS,
                       help="output format (choose from %s)" % format_choices_str)
     parser.add_option("-s", "--scale", metavar="SCALE", type=float, default=8.0,
                       help="scale output geometry by SCALE factor, defaults to %default")
