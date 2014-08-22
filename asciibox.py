@@ -272,7 +272,7 @@ def _render(text, output_file, **kwargs):
     except KeyError:
         raise OutputFormatError(output_format)
     figure = _Figure(text)
-    render_function(figure, output_file)
+    render_function(figure, output_file, **kwargs)
 
 def render(text, output_file, **kwargs):
     if isinstance(output_file, (str, unicode)):
