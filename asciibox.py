@@ -61,34 +61,34 @@ __doc__ = """%s
 %s
 """ % (_DESCRIPTION, _LONG_VERSION)
 
-def _cairo_draw_line(cairo_context, line):
+def _draw_line(context, line):
     x0, y0, x1, y1 = line
-    cairo_context.move_to(x0, y0)
-    cairo_context.line_to(x1, y1)
-    cairo_context.stroke()
+    context.move_to(x0, y0)
+    context.line_to(x1, y1)
+    context.stroke()
 
-def _cairo_draw_text(cairo_context, text, font_description):
+def _draw_text(context, text, font_description):
     pos, string = text
-    layout = cairo_context.create_layout()
+    layout = context.create_layout()
     layout.set_font_description(font_description)
     layout.set_text(string)
     x, y = pos
-    cairo_context.move_to(x, y)
-    cairo_context.show_layout(layout)
+    context.move_to(x, y)
+    context.show_layout(layout)
 
 def _render_surface(ascii_figure, surface, scale):
     scale_x, scale_y = scale
 
-    cairo_context = pangocairo.CairoContext(cairo.Context(surface))
-    cairo_context.set_line_width(0.25)
-    cairo_context.scale(scale_x, scale_y)
+    context = pangocairo.CairoContext(cairo.Context(surface))
+    context.set_line_width(0.25)
+    context.scale(scale_x, scale_y)
     font_description = pango.FontDescription("DejaVuSansMono 1")
 
     for line in ascii_figure.lines:
-        _cairo_draw_line(cairo_context, line)
+        _draw_line(context, line)
 
     for text in ascii_figure.texts:
-        _cairo_draw_text(cairo_context, text, font_description)
+        _draw_text(context, text, font_description)
 
 def _render_svg(ascii_figure, image_file, scale=(8, 8)):
     width, height = ascii_figure.size
