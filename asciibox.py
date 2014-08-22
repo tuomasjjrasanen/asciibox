@@ -95,6 +95,7 @@ def _draw_text(context, text, font_description):
 def _render_surface(figure, surface, scale_x, scale_y):
     context = pangocairo.CairoContext(cairo.Context(surface))
     context.set_line_width(0.25)
+    context.set_line_cap(cairo.LINE_CAP_SQUARE)
     context.scale(scale_x, scale_y)
     font_description = pango.FontDescription("DejaVuSansMono 1")
 
