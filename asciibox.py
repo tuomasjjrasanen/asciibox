@@ -64,6 +64,15 @@ __doc__ = """%s
 class Error(Exception):
     pass
 
+class OutputFormatError(Error):
+
+    def __init__(self, output_format):
+        Error.__init__(self, output_format)
+        self.output_format = output_format
+
+    def __str__(self):
+        return "invalid output format '%s'" % self.output_format
+
 def _draw_line(context, line):
     x0, y0, x1, y1 = line
     context.move_to(x0, y0)
@@ -258,7 +267,7 @@ def _render(ascii_text, output_file, **kwargs):
     try:
         render_function = _RENDER_FUNCTIONS[output_format]
     except KeyError:
-        raise Error("invalid output format", output_format)
+        raise OutputFormatError(output_format)
     ascii_figure = _Figure(ascii_text)
     render_function(ascii_figure, output_file)
 
