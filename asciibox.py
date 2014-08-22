@@ -20,6 +20,7 @@ from __future__ import absolute_import
 from __future__ import print_function
 
 import codecs
+import math
 import optparse
 import os
 import os.path
@@ -105,16 +106,16 @@ def _render_surface(figure, surface, scale_x, scale_y):
 
 def _render_svg(figure, output_file, scale_x=8, scale_y=8):
     surface = cairo.SVGSurface(output_file,
-                               figure.width * scale_x,
-                               figure.height * scale_y)
+                               int(math.ceil(figure.width * scale_x)),
+                               int(math.ceil(figure.height * scale_y)))
     _render_surface(figure, surface, scale_x, scale_y)
 
     surface.finish()
 
 def _render_png(figure, output_file, scale_x=8, scale_y=8):
     surface = cairo.ImageSurface(cairo.FORMAT_ARGB32,
-                                 figure.width * scale_x,
-                                 figure.height * scale_y)
+                                 int(math.ceil(figure.width * scale_x)),
+                                 int(math.ceil(figure.height * scale_y)))
     _render_surface(figure, surface, scale_x, scale_y)
 
     surface.write_to_png(output_file)
@@ -245,6 +246,8 @@ def _parse_args(argv):
     parser.add_option("-t", "--output-format", metavar="FORMAT", type="choice",
                       choices=OUTPUT_FORMATS, default=None,
                       help="output format (choose from %s)" % format_choices_str)
+    parser.add_option("-s", "--scale", metavar="SCALE", type=float, default=8.0,
+                      help="scale output geometry by SCALE factor, defaults to %default")
 
     options, args = parser.parse_args(argv)
 
@@ -262,6 +265,10 @@ def _parse_args(argv):
 
     if options.output_format is not None:
         render_options["output_format"] = options.output_format
+
+    if options.scale is not None:
+        render_options["scale_x"] = options.scale
+        render_options["scale_y"] = options.scale
 
     return options, render_options
 
