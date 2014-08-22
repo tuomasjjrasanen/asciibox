@@ -205,10 +205,11 @@ class _Figure:
     def texts(self):
         return self.__chars
 
-IMAGE_FORMATS = {
+_RENDER_FUNCTIONS = {
     "png": _render_to_png,
     "svg": _render_to_svg,
     }
+IMAGE_FORMATS = _RENDER_FUNCTIONS.keys()
 
 def _parse_args(argv):
     parser = optparse.OptionParser(version=_LONG_VERSION,
@@ -222,7 +223,7 @@ def _parse_args(argv):
     parser.add_option("-o", metavar="FILE", dest="outfile", default=None,
                       help="output image file, defaults to standard output")
     parser.add_option("-t", metavar="FORMAT", dest="format", type="choice",
-                      choices=IMAGE_FORMATS.keys(), default=None,
+                      choices=IMAGE_FORMATS, default=None,
                       help="output image format (choose from %s)" % format_choices_str)
 
     options, args = parser.parse_args(argv)
@@ -254,7 +255,7 @@ def _parse_args(argv):
 
 def _render(ascii_text, image_file, **kwargs):
     image_format = kwargs.get("image_format", "png")
-    render_function = IMAGE_FORMATS[image_format]
+    render_function = _RENDER_FUNCTIONS[image_format]
     ascii_figure = _Figure(ascii_text)
     render_function(image_file, ascii_figure)
 
