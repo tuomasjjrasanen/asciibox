@@ -61,57 +61,52 @@ __doc__ = """%s
 %s
 """ % (_DESCRIPTION, _LONG_VERSION)
 
-class _CairoCanvas(object):
+def _cairo_draw_line(cairo_context, line):
+    x0, y0, x1, y1 = line
+    cairo_context.move_to(x0, y0)
+    cairo_context.line_to(x1, y1)
+    cairo_context.stroke()
 
-    def __init__(self, surface, scale):
-        scale_x, scale_y = scale
-        self.__ctx = pangocairo.CairoContext(cairo.Context(surface))
-        self.__ctx.set_line_width(0.25)
-        self.__ctx.scale(scale_x, scale_y)
-        self.__font_desc = pango.FontDescription("DejaVuSansMono 1")
+def _cairo_draw_text(cairo_context, text, font_description):
+    pos, string = text
+    layout = cairo_context.create_layout()
+    layout.set_font_description(font_description)
+    layout.set_text(string)
+    x, y = pos
+    cairo_context.move_to(x, y)
+    cairo_context.show_layout(layout)
 
-    def draw_line(self, line):
-        x0, y0, x1, y1 = line
-        self.__ctx.move_to(x0, y0)
-        self.__ctx.line_to(x1, y1)
-        self.__ctx.stroke()
+def _render_to_surface(surface, ascii_figure, scale):
+    scale_x, scale_y = scale
 
-    def draw_text(self, pos, text):
-        layout = self.__ctx.create_layout()
-        layout.set_font_description(self.__font_desc)
-        layout.set_text(text)
-        x, y = pos
-        self.__ctx.move_to(x, y)
-        self.__ctx.show_layout(layout)
+    cairo_context = pangocairo.CairoContext(cairo.Context(surface))
+    cairo_context.set_line_width(0.25)
+    cairo_context.scale(scale_x, scale_y)
+    font_description = pango.FontDescription("DejaVuSansMono 1")
 
-class _VectorCairoCanvas(_CairoCanvas):
+    for line in ascii_figure.lines:
+        _cairo_draw_line(cairo_context, line)
 
-    def __init__(self, size, scale=(8, 8)):
-        scale_x, scale_y = scale
-        width, height = size
-        self.__imgfile = os.tmpfile()
-        self.__surface = cairo.SVGSurface(self.__imgfile, width * scale_x, height * scale_y)
-        _CairoCanvas.__init__(self, self.__surface, scale)
+    for text in ascii_figure.texts:
+        _cairo_draw_text(cairo_context, text, font_description)
 
-    def write(self, outfile):
-        self.__surface.finish()
-        self.__imgfile.seek(0)
-        while True:
-            data = self.__imgfile.read(1024)
-            if not data:
-                break
-            outfile.write(data)
+def _render_to_svg(image_file, ascii_figure, scale=(8, 8)):
+    width, height = ascii_figure.size
+    scale_x, scale_y = scale
 
-class _RasterCairoCanvas(_CairoCanvas):
+    surface = cairo.SVGSurface(image_file, width * scale_x, height * scale_y)
+    _render_to_surface(surface, ascii_figure, scale)
 
-    def __init__(self, size, scale=(8, 8)):
-        scale_x, scale_y = scale
-        width, height = size
-        self.__surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, width * scale_x, height * scale_y)
-        _CairoCanvas.__init__(self, self.__surface, scale)
+    surface.finish()
 
-    def write(self, outfile):
-        self.__surface.write_to_png(outfile)
+def _render_to_png(image_file, ascii_figure, scale=(8, 8)):
+    width, height = ascii_figure.size
+    scale_x, scale_y = scale
+
+    surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, width * scale_x, height * scale_y)
+    _render_to_surface(surface, ascii_figure, scale)
+
+    surface.write_to_png(image_file)
 
 class _TextRect:
 
@@ -202,15 +197,17 @@ class _Figure:
     def size(self):
         return self.__size
 
-    def draw(self, canvas):
-        for line in self.__lines:
-            canvas.draw_line(line)
-        for pos, char in self.__chars:
-            canvas.draw_text(pos, char)
+    @property
+    def lines(self):
+        return self.__lines
+
+    @property
+    def texts(self):
+        return self.__chars
 
 IMAGE_FORMATS = {
-    "png": _RasterCairoCanvas,
-    "svg": _VectorCairoCanvas,
+    "png": _render_to_png,
+    "svg": _render_to_svg,
     }
 
 def _parse_args(argv):
@@ -257,10 +254,8 @@ def _parse_args(argv):
 
 def render_to_file(text, image_file, image_format):
     figure = _Figure(text)
-    canvas_class = IMAGE_FORMATS[image_format]
-    canvas = canvas_class(figure.size)
-    figure.draw(canvas)
-    canvas.write(image_file)
+    render_function = IMAGE_FORMATS[image_format]
+    render_function(image_file, figure)
 
 def render_to_filename(text, filename, image_format=None):
     with open(filename, "wb") as image_file:
