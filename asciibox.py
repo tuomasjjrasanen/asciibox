@@ -76,7 +76,7 @@ def _cairo_draw_text(cairo_context, text, font_description):
     cairo_context.move_to(x, y)
     cairo_context.show_layout(layout)
 
-def _render_to_surface(surface, ascii_figure, scale):
+def _render_surface(ascii_figure, surface, scale):
     scale_x, scale_y = scale
 
     cairo_context = pangocairo.CairoContext(cairo.Context(surface))
@@ -90,21 +90,21 @@ def _render_to_surface(surface, ascii_figure, scale):
     for text in ascii_figure.texts:
         _cairo_draw_text(cairo_context, text, font_description)
 
-def _render_to_svg(image_file, ascii_figure, scale=(8, 8)):
+def _render_svg(ascii_figure, image_file, scale=(8, 8)):
     width, height = ascii_figure.size
     scale_x, scale_y = scale
 
     surface = cairo.SVGSurface(image_file, width * scale_x, height * scale_y)
-    _render_to_surface(surface, ascii_figure, scale)
+    _render_surface(ascii_figure, surface, scale)
 
     surface.finish()
 
-def _render_to_png(image_file, ascii_figure, scale=(8, 8)):
+def _render_png(ascii_figure, image_file, scale=(8, 8)):
     width, height = ascii_figure.size
     scale_x, scale_y = scale
 
     surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, width * scale_x, height * scale_y)
-    _render_to_surface(surface, ascii_figure, scale)
+    _render_surface(ascii_figure, surface, scale)
 
     surface.write_to_png(image_file)
 
@@ -206,8 +206,8 @@ class _Figure:
         return self.__chars
 
 _RENDER_FUNCTIONS = {
-    "png": _render_to_png,
-    "svg": _render_to_svg,
+    "png": _render_png,
+    "svg": _render_svg,
     }
 IMAGE_FORMATS = _RENDER_FUNCTIONS.keys()
 
@@ -257,7 +257,7 @@ def _render(ascii_text, image_file, **kwargs):
     image_format = kwargs.get("image_format", "png")
     render_function = _RENDER_FUNCTIONS[image_format]
     ascii_figure = _Figure(ascii_text)
-    render_function(image_file, ascii_figure)
+    render_function(ascii_figure, image_file)
 
 def render(ascii_text, image_file, **kwargs):
     if isinstance(image_file, (str, unicode)):
