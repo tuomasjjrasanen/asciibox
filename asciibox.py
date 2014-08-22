@@ -61,6 +61,9 @@ __doc__ = """%s
 %s
 """ % (_DESCRIPTION, _LONG_VERSION)
 
+class Error(Exception):
+    pass
+
 def _draw_line(context, line):
     x0, y0, x1, y1 = line
     context.move_to(x0, y0)
@@ -212,6 +215,7 @@ _RENDER_FUNCTIONS = {
 IMAGE_FORMATS = _RENDER_FUNCTIONS.keys()
 
 def _parse_args(argv):
+    render_options = {}
     parser = optparse.OptionParser(version=_LONG_VERSION,
                                    description=_DESCRIPTION)
 
@@ -238,24 +242,19 @@ def _parse_args(argv):
                                      encoding=sys.stdin.encoding)
 
     if options.outfile is None:
-        if options.format is None:
-            options.format = "png"
         options.outfile = sys.stdout
-    else:
-        if options.format is None:
-            ext = os.path.splitext(options.outfile)[1]
-            options.format = ext[len(os.path.extsep):]
-        options.outfile = open(options.outfile, "wb")
 
-    if options.format not in IMAGE_FORMATS:
-        parser.error("invalid output image format: %r (choose from %s)"
-                     % (options.format, format_choices_str))
+    if options.format is not None:
+        render_options["image_format"] = options.format
 
-    return options
+    return options, render_options
 
 def _render(ascii_text, image_file, **kwargs):
     image_format = kwargs.get("image_format", "png")
-    render_function = _RENDER_FUNCTIONS[image_format]
+    try:
+        render_function = _RENDER_FUNCTIONS[image_format]
+    except KeyError:
+        raise Error("invalid output format", image_format)
     ascii_figure = _Figure(ascii_text)
     render_function(ascii_figure, image_file)
 
@@ -269,9 +268,9 @@ def render(ascii_text, image_file, **kwargs):
     _render(ascii_text, image_file, **kwargs)
 
 def _main():
-    options = _parse_args(sys.argv)
+    options, render_options = _parse_args(sys.argv)
     text = unicode(options.infile.read())
-    render(text, options.outfile, image_format=options.format)
+    render(text, options.outfile, **render_options)
 
 if __name__ == "__main__":
     _main()
