@@ -26,6 +26,9 @@ import os
 import os.path
 import sys
 
+import docutils.nodes
+from docutils.parsers import rst
+
 import cairo
 import pango
 import pangocairo
@@ -290,6 +293,37 @@ def render(text, output_file, **kwargs):
             _render(text, f, **kwargs)
 
     _render(text, output_file, **kwargs)
+
+def _output_format(argument):
+    return rst.directives.choice(argument, OUTPUT_FORMATS)
+
+class ASCIIBoxDirective(rst.Directive):
+
+    required_arguments = 1
+    optional_arguments = 2
+    has_content = True
+    option_spec = {
+        'scale': rst.directives.nonnegative_int,
+        'output_format': _output_format,
+        }
+
+    def run(self):
+        self.assert_has_content()
+
+        render_options = {}
+        for key in ASCIIBoxDirective.option_spec:
+            try:
+                render_options[key] = self.options[key]
+            except KeyError:
+                continue
+
+        filename = self.arguments[0]
+        render("\n".join(self.content), filename, **render_options)
+        uri = rst.directives.uri(filename)
+        return [docutils.nodes.image(uri=uri)]
+
+def register_directive(name='asciibox'):
+    rst.directives.register_directive(name, ASCIIBoxDirective)
 
 def _main():
     options, render_options = _parse_args(sys.argv)
