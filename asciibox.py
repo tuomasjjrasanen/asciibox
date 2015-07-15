@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# Copyright © 2014 Tuomas Räsänen
+# Copyright © 2015 Tuomas Räsänen
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -33,12 +33,12 @@ import cairo
 import pango
 import pangocairo
 
-VERSION = "0.2"
+VERSION = "0.3"
 _DESCRIPTION = "Render ASCII boxes and arrows as images."
 _AUTHOR = "Tuomas Räsänen"
 _EMAIL = "tuomasjjrasanen@tjjr.fi"
 _LONG_VERSION = """asciibox %s
-Copyright (C) 2014 %s
+Copyright (C) 2015 %s
 License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
 This is free software: you are free to change and redistribute it.
 There is NO WARRANTY, to the extent permitted by law.

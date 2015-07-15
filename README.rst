@@ -4,7 +4,7 @@
 
 Render ASCII boxes and arrows as images.
 
-- Version : 0.2
+- Version : 0.3
 - License : GPLv3+ (see COPYING for details)
 - Author  : Tuomas Räsänen <tuomasjjrasanen@tjjr.fi>
 - Homepage: <http://tjjr.fi/sw/asciibox/>
