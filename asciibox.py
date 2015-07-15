@@ -300,25 +300,33 @@ def _output_format(argument):
 class ASCIIBoxDirective(rst.Directive):
 
     required_arguments = 1
-    optional_arguments = 2
+    optional_arguments = 3
     has_content = True
     option_spec = {
         'scale': rst.directives.nonnegative_int,
         'output_format': _output_format,
+        'source_file': rst.directives.path,
         }
 
     def run(self):
-        self.assert_has_content()
+        try:
+            source_filepath = self.options['source_file']
+        except KeyError:
+            self.assert_has_content()
+            source_text = "\n".join(self.content)
+        else:
+            with open(source_filepath) as source_file:
+                source_text = source_file.read()
 
         render_options = {}
-        for key in ASCIIBoxDirective.option_spec:
+        for key in ('output_format', 'scale'):
             try:
                 render_options[key] = self.options[key]
             except KeyError:
                 continue
 
         filename = self.arguments[0]
-        render("\n".join(self.content), filename, **render_options)
+        render(source_text, filename, **render_options)
         uri = rst.directives.uri(filename)
         return [docutils.nodes.image(uri=uri)]
 
