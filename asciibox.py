@@ -330,7 +330,7 @@ class _ASCIIBoxDirective(rst.Directive):
         uri = rst.directives.uri(filename)
         return [docutils.nodes.image(uri=uri)]
 
-def register_directive(name='asciibox'):
+def register_rst_directive(name='asciibox'):
     rst.directives.register_directive(name, _ASCIIBoxDirective)
 
 def _main():
