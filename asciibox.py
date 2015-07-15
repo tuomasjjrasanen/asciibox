@@ -300,12 +300,13 @@ def _output_format(argument):
 class _ASCIIBoxDirective(rst.Directive):
 
     required_arguments = 1
-    optional_arguments = 3
+    optional_arguments = 4
     has_content = True
     option_spec = {
         'scale': rst.directives.nonnegative_int,
         'output_format': _output_format,
         'source_file': rst.directives.path,
+        'target_file': rst.directives.path,
         }
 
     def run(self):
@@ -325,9 +326,9 @@ class _ASCIIBoxDirective(rst.Directive):
             except KeyError:
                 continue
 
-        filename = self.arguments[0]
+        filename = self.options.get('target_file', self.arguments[0])
         render(source_text, filename, **render_options)
-        uri = rst.directives.uri(filename)
+        uri = rst.directives.uri(self.arguments[0])
         return [docutils.nodes.image(uri=uri)]
 
 def register_rst_directive(name='asciibox'):
