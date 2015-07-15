@@ -297,7 +297,7 @@ def render(text, output_file, **kwargs):
 def _output_format(argument):
     return rst.directives.choice(argument, OUTPUT_FORMATS)
 
-class ASCIIBoxDirective(rst.Directive):
+class _ASCIIBoxDirective(rst.Directive):
 
     required_arguments = 1
     optional_arguments = 3
@@ -331,7 +331,7 @@ class ASCIIBoxDirective(rst.Directive):
         return [docutils.nodes.image(uri=uri)]
 
 def register_directive(name='asciibox'):
-    rst.directives.register_directive(name, ASCIIBoxDirective)
+    rst.directives.register_directive(name, _ASCIIBoxDirective)
 
 def _main():
     options, render_options = _parse_args(sys.argv)
