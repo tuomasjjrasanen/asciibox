@@ -300,10 +300,12 @@ def _output_format(argument):
 class _ASCIIBoxDirective(rst.Directive):
 
     required_arguments = 1
-    optional_arguments = 4
+    optional_arguments = 6
     has_content = True
     option_spec = {
         'scale': rst.directives.nonnegative_int,
+        'scale_x': rst.directives.nonnegative_int,
+        'scale_y': rst.directives.nonnegative_int,
         'output_format': _output_format,
         'source_file': rst.directives.path,
         'target_file': rst.directives.path,
@@ -320,11 +322,19 @@ class _ASCIIBoxDirective(rst.Directive):
                 source_text = source_file.read()
 
         render_options = {}
-        for key in ('output_format', 'scale'):
+        for key in ('output_format', 'scale_x', 'scale_y'):
             try:
                 render_options[key] = self.options[key]
             except KeyError:
                 continue
+
+        try:
+            scale = self.options['scale']
+        except KeyError:
+            pass
+        else:
+            render_options['scale_x'] = scale
+            render_options['scale_y'] = scale
 
         filename = self.options.get('target_file', self.arguments[0])
         render(source_text, filename, **render_options)
