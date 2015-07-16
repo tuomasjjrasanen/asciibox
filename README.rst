@@ -5,7 +5,7 @@
 ASCII Box is a Python program which renders "boxes and arrows" text diagrams as
 image files. Currently ASCII Box can render PNG and SVG files.
 
-:Version:  0.3
+:Version:  0.3.1
 :License:  GPLv3+ (see COPYING for details)
 :Homepage: http://tjjr.fi/sw/asciibox/
 :Sources:  http://github.com/tuomasjjrasanen/asciibox/
