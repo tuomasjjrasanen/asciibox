@@ -10,6 +10,7 @@ setup(name='asciibox',
       py_modules=['asciibox'],
       scripts=['asciibox'],
       license='GPLv3+',
+      install_requires=['docutils'],
       platforms=['Linux'],
       download_url='http://tjjr.fi/sw/asciibox/releases/asciibox-0.3.1.tar.gz',
       classifiers=[
