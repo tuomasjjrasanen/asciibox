@@ -19,13 +19,10 @@ from __future__ import division
 from __future__ import absolute_import
 from __future__ import print_function
 
-import codecs
 import errno
 import math
-import optparse
 import os
 import os.path
-import sys
 
 import docutils.nodes
 from docutils.parsers import rst
@@ -35,16 +32,16 @@ import pango
 import pangocairo
 
 VERSION = "0.3.1"
-_DESCRIPTION = "Render ASCII boxes and arrows as images."
-_AUTHOR = "Tuomas Räsänen"
-_EMAIL = "tuomasjjrasanen@tjjr.fi"
-_LONG_VERSION = """asciibox %s
+DESCRIPTION = "Render ASCII boxes and arrows as images."
+AUTHOR = "Tuomas Räsänen"
+EMAIL = "tuomasjjrasanen@tjjr.fi"
+LONG_VERSION = """asciibox %s
 Copyright (C) 2015 %s
 License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
 This is free software: you are free to change and redistribute it.
 There is NO WARRANTY, to the extent permitted by law.
 
-Written by %s <%s>.""" % (VERSION, _AUTHOR, _AUTHOR, _EMAIL)
+Written by %s <%s>.""" % (VERSION, AUTHOR, AUTHOR, EMAIL)
 
 __doc__ = """%s
 
@@ -65,7 +62,7 @@ __doc__ = """%s
 >>> asciibox.render(text, "/tmp/asciibox.png")
 
 %s
-""" % (_DESCRIPTION, _LONG_VERSION)
+""" % (DESCRIPTION, LONG_VERSION)
 
 class Error(Exception):
     pass
@@ -236,47 +233,6 @@ _RENDER_FUNCTIONS = {
     }
 OUTPUT_FORMATS = _RENDER_FUNCTIONS.keys()
 
-def _parse_args(argv):
-    render_options = {}
-    parser = optparse.OptionParser(version=_LONG_VERSION,
-                                   description=_DESCRIPTION)
-
-
-    format_choices_str = ", ".join([repr(s) for s in OUTPUT_FORMATS])
-
-    parser.add_option("-i", "--input-file", metavar="FILE",
-                      help="input file, defaults to standard input")
-    parser.add_option("-o", "--output-file", metavar="FILE",
-                      help="output file, defaults to standard output")
-    parser.add_option("-t", "--output-format", metavar="FORMAT", type="choice",
-                      choices=OUTPUT_FORMATS,
-                      help="output format (choose from %s)" % format_choices_str)
-    parser.add_option("-s", "--scale", metavar="SCALE", type=float, default=8.0,
-                      help="scale output geometry by SCALE factor, defaults to %default")
-
-    options, args = parser.parse_args(argv)
-
-    if len(args) > 1:
-        parser.error("encountered extra arguments")
-
-    if options.input_file is None:
-        options.input_file = sys.stdin
-    else:
-        options.input_file = codecs.open(options.input_file,
-                                         encoding=sys.stdin.encoding)
-
-    if options.output_file is None:
-        options.output_file = sys.stdout
-
-    if options.output_format is not None:
-        render_options["output_format"] = options.output_format
-
-    if options.scale is not None:
-        render_options["scale_x"] = options.scale
-        render_options["scale_y"] = options.scale
-
-    return options, render_options
-
 def _render(text, output_file, **kwargs):
     output_format = kwargs.pop("output_format", None)
     try:
@@ -351,15 +307,3 @@ class _ASCIIBoxDirective(rst.Directive):
 
 def register_rst_directive(name='asciibox'):
     rst.directives.register_directive(name, _ASCIIBoxDirective)
-
-def _main():
-    options, render_options = _parse_args(sys.argv)
-    text = unicode(options.input_file.read())
-    render(text, options.output_file, **render_options)
-
-if __name__ == "__main__":
-    try:
-        _main()
-    except Error, e:
-        print("error:", e, file=sys.stderr)
-        sys.exit(1)
