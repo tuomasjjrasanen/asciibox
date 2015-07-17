@@ -20,6 +20,7 @@ from __future__ import absolute_import
 from __future__ import print_function
 
 import codecs
+import errno
 import math
 import optparse
 import os
@@ -337,6 +338,13 @@ class _ASCIIBoxDirective(rst.Directive):
             render_options['scale_y'] = scale
 
         filename = self.options.get('target_file', self.arguments[0])
+        dirname = os.path.dirname(filename)
+        if dirname:
+            try:
+                os.makedirs(dirname)
+            except OSError, e:
+                if e.errno != errno.EEXIST:
+                    raise e
         render(source_text, filename, **render_options)
         uri = rst.directives.uri(self.arguments[0])
         return [docutils.nodes.image(uri=uri)]
