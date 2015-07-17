@@ -30,13 +30,13 @@ __all__ = [
     "OUTPUT_FORMATS",
 ]
 
-def _draw_line(context, line):
+def _pangocairo_draw_line(context, line):
     x0, y0, x1, y1 = line
     context.move_to(x0, y0)
     context.line_to(x1, y1)
     context.stroke()
 
-def _draw_text(context, text, font_description):
+def _pangocairo_draw_text(context, text, font_description):
     pos, string = text
     layout = context.create_layout()
     layout.set_font_description(font_description)
@@ -45,7 +45,7 @@ def _draw_text(context, text, font_description):
     context.move_to(x, y)
     context.show_layout(layout)
 
-def _render_surface(figure, surface, scale_x, scale_y):
+def _pangocairo_render_surface(figure, surface, scale_x, scale_y):
     context = pangocairo.CairoContext(cairo.Context(surface))
     context.set_line_width(0.25)
     context.set_line_cap(cairo.LINE_CAP_SQUARE)
@@ -53,12 +53,12 @@ def _render_surface(figure, surface, scale_x, scale_y):
     font_description = pango.FontDescription("DejaVuSansMono 1")
 
     for line in figure.lines:
-        _draw_line(context, line)
+        _pangocairo_draw_line(context, line)
 
     for text in figure.texts:
-        _draw_text(context, text, font_description)
+        _pangocairo_draw_text(context, text, font_description)
 
-def _render_svg(figure, output_file, scale_x=8, scale_y=8):
+def _pangocairo_render_svg(figure, output_file, scale_x=8, scale_y=8):
     surface = cairo.SVGSurface(output_file,
                                int(math.ceil(figure.width * scale_x)),
                                int(math.ceil(figure.height * scale_y)))
@@ -66,11 +66,11 @@ def _render_svg(figure, output_file, scale_x=8, scale_y=8):
 
     surface.finish()
 
-def _render_png(figure, output_file, scale_x=8, scale_y=8):
+def _pangocairo_render_png(figure, output_file, scale_x=8, scale_y=8):
     surface = cairo.ImageSurface(cairo.FORMAT_ARGB32,
                                  int(math.ceil(figure.width * scale_x)),
                                  int(math.ceil(figure.height * scale_y)))
-    _render_surface(figure, surface, scale_x, scale_y)
+    _pangocairo_render_surface(figure, surface, scale_x, scale_y)
 
     surface.write_to_png(output_file)
 
@@ -180,9 +180,9 @@ class _Figure:
         return self.__texts
 
 _RENDER_FUNCTIONS = {
-    "png": _render_png,
-    "svg": _render_svg,
-    }
+    "png": _pangocairo_render_png,
+    "svg": _pangocairo_render_svg,
+}
 OUTPUT_FORMATS = _RENDER_FUNCTIONS.keys()
 
 def _render(text, output_file, **kwargs):
