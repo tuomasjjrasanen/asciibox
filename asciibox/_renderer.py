@@ -15,68 +15,21 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import division
 from __future__ import absolute_import
-from __future__ import print_function
 
-import errno
 import math
-import os
 import os.path
-
-import docutils.nodes
-from docutils.parsers import rst
 
 import cairo
 import pango
 import pangocairo
 
-VERSION = "0.3.1"
-DESCRIPTION = "Render ASCII boxes and arrows as images."
-AUTHOR = "Tuomas Räsänen"
-EMAIL = "tuomasjjrasanen@tjjr.fi"
-LONG_VERSION = """asciibox %s
-Copyright (C) 2015 %s
-License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
-This is free software: you are free to change and redistribute it.
-There is NO WARRANTY, to the extent permitted by law.
+from ._error import OutputFormatError
 
-Written by %s <%s>.""" % (VERSION, AUTHOR, AUTHOR, EMAIL)
-
-__doc__ = """%s
-
->>> text = '''
-... +---------------------+
-... |                     |
-... +--------------+------+
-... |              |      |
-... |      +-------+      |
-... |      |       |      |
-... +------+--+----+------+
-...    ^      |
-...    |      |
-...    |      |
-...    +------+
-... '''
->>> import asciibox
->>> asciibox.render(text, "/tmp/asciibox.png")
-
-%s
-""" % (DESCRIPTION, LONG_VERSION)
-
-class Error(Exception):
-    pass
-
-class OutputFormatError(Error):
-
-    def __init__(self, output_format):
-        Error.__init__(self, output_format)
-        self.output_format = output_format
-
-    def __str__(self):
-        if self.output_format is None:
-            return "undefined output format"
-        return "invalid output format '%s'" % self.output_format
+__all__ = [
+    "render",
+    "OUTPUT_FORMATS",
+]
 
 def _draw_line(context, line):
     x0, y0, x1, y1 = line
@@ -250,60 +203,3 @@ def render(text, output_file, **kwargs):
             _render(text, f, **kwargs)
 
     _render(text, output_file, **kwargs)
-
-def _output_format(argument):
-    return rst.directives.choice(argument, OUTPUT_FORMATS)
-
-class _ASCIIBoxDirective(rst.Directive):
-
-    required_arguments = 1
-    optional_arguments = 6
-    has_content = True
-    option_spec = {
-        'scale': rst.directives.nonnegative_int,
-        'scale_x': rst.directives.nonnegative_int,
-        'scale_y': rst.directives.nonnegative_int,
-        'output_format': _output_format,
-        'source_file': rst.directives.path,
-        'target_file': rst.directives.path,
-        }
-
-    def run(self):
-        try:
-            source_filepath = self.options['source_file']
-        except KeyError:
-            self.assert_has_content()
-            source_text = "\n".join(self.content)
-        else:
-            with open(source_filepath) as source_file:
-                source_text = source_file.read()
-
-        render_options = {}
-        for key in ('output_format', 'scale_x', 'scale_y'):
-            try:
-                render_options[key] = self.options[key]
-            except KeyError:
-                continue
-
-        try:
-            scale = self.options['scale']
-        except KeyError:
-            pass
-        else:
-            render_options['scale_x'] = scale
-            render_options['scale_y'] = scale
-
-        filename = self.options.get('target_file', self.arguments[0])
-        dirname = os.path.dirname(filename)
-        if dirname:
-            try:
-                os.makedirs(dirname)
-            except OSError, e:
-                if e.errno != errno.EEXIST:
-                    raise e
-        render(source_text, filename, **render_options)
-        uri = rst.directives.uri(self.arguments[0])
-        return [docutils.nodes.image(uri=uri)]
-
-def register_rst_directive(name='asciibox'):
-    rst.directives.register_directive(name, _ASCIIBoxDirective)

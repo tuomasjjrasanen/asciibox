@@ -25,10 +25,22 @@ import sys
 
 import asciibox
 
+VERSION = "0.3.1"
+DESCRIPTION = "Render ASCII boxes and arrows as images."
+AUTHOR = "Tuomas Räsänen"
+EMAIL = "tuomasjjrasanen@tjjr.fi"
+LONG_VERSION = """asciibox %s
+Copyright (C) 2015 %s
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+
+Written by %s <%s>.""" % (VERSION, AUTHOR, AUTHOR, EMAIL)
+
 def _parse_args(argv):
     render_options = {}
-    parser = optparse.OptionParser(version=asciibox.LONG_VERSION,
-                                   description=asciibox.DESCRIPTION)
+    parser = optparse.OptionParser(version=LONG_VERSION,
+                                   description=DESCRIPTION)
 
 
     format_choices_str = ", ".join([repr(s) for s in asciibox.OUTPUT_FORMATS])
