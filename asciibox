@@ -46,7 +46,7 @@ def _parse_args(argv):
     options, args = parser.parse_args(argv)
 
     if len(args) > 1:
-        parser.error("encountered extra arguments")
+        parser.error("invalid number of arguments (%d), expected 1" % len(args))
 
     if options.input_file is None:
         options.input_file = sys.stdin
