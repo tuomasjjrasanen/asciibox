@@ -19,84 +19,16 @@ from __future__ import absolute_import
 import math
 import os.path
 
-BACKENDS = []
-
-_last_backend_import_error = None
-try:
-    import cairo
-    import pango
-    import pangocairo
-except ImportError, e:
-    _last_backend_import_error = e
-else:
-    BACKENDS.append("pangocairo")
-
-try:
-    from PIL import Image
-    from PIL import ImageDraw
-    from PIL import ImageFont
-except ImportError, e:
-    _last_backend_import_error = e
-else:
-    BACKENDS.append("pillow")
-
-if not BACKENDS:
-    raise _last_backend_import_error
-
-default_backend = BACKENDS[0]
+from PIL import Image
+from PIL import ImageDraw
+from PIL import ImageFont
 
 from ._error import OutputFormatError
 
 __all__ = [
-    "BACKENDS",
     "OUTPUT_FORMATS",
-    "default_backend",
     "render",
 ]
-
-def _pangocairo_draw_line(context, line):
-    x0, y0, x1, y1 = line
-    context.move_to(x0, y0)
-    context.line_to(x1, y1)
-    context.stroke()
-
-def _pangocairo_draw_text(context, text, font_description):
-    pos, string = text
-    layout = context.create_layout()
-    layout.set_font_description(font_description)
-    layout.set_text(string)
-    x, y = pos
-    context.move_to(x, y)
-    context.show_layout(layout)
-
-def _pangocairo_render_surface(figure, surface, scale_x, scale_y):
-    context = pangocairo.CairoContext(cairo.Context(surface))
-    context.set_line_width(0.25)
-    context.set_line_cap(cairo.LINE_CAP_SQUARE)
-    context.scale(scale_x, scale_y)
-    font_description = pango.FontDescription("DejaVuSansMono 1")
-
-    for line in figure.lines:
-        _pangocairo_draw_line(context, line)
-
-    for text in figure.texts:
-        _pangocairo_draw_text(context, text, font_description)
-
-def _pangocairo_render_svg(figure, output_file, scale_x=8, scale_y=8):
-    surface = cairo.SVGSurface(output_file,
-                               int(math.ceil(figure.width * scale_x)),
-                               int(math.ceil(figure.height * scale_y)))
-    _render_surface(figure, surface, scale_x, scale_y)
-
-    surface.finish()
-
-def _pangocairo_render_png(figure, output_file, scale_x=8, scale_y=8):
-    surface = cairo.ImageSurface(cairo.FORMAT_ARGB32,
-                                 int(math.ceil(figure.width * scale_x)),
-                                 int(math.ceil(figure.height * scale_y)))
-    _pangocairo_render_surface(figure, surface, scale_x, scale_y)
-
-    surface.write_to_png(output_file)
 
 def _pillow_render_png(figure, output_file, scale_x=8, scale_y=8):
     image_width = int(math.ceil(figure.width * scale_x))
@@ -229,28 +161,14 @@ class _Figure:
         return self.__texts
 
 _RENDER_FUNCTIONS = {
-    "pangocairo": {
-        "png": _pangocairo_render_png,
-        "svg": _pangocairo_render_svg,
-    },
-    "pillow": {
-        "png": _pillow_render_png,
-    }
+    "png": _pillow_render_png,
 }
-
-OUTPUT_FORMATS = _RENDER_FUNCTIONS[default_backend].keys()
+OUTPUT_FORMATS = _RENDER_FUNCTIONS.keys()
 
 def _render(text, output_file, **kwargs):
-    backend = kwargs.pop("backend", default_backend)
-
-    try:
-        render_functions = _RENDER_FUNCTIONS[backend]
-    except KeyError:
-        raise BackendError(backend)
-
     output_format = kwargs.pop("output_format", None)
     try:
-        render_function = render_functions[output_format]
+        render_function = _RENDER_FUNCTIONS[output_format]
     except KeyError:
         raise OutputFormatError(output_format)
     figure = _Figure(text)
