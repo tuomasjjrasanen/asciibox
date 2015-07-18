@@ -203,13 +203,10 @@ _RENDER_FUNCTIONS = {
 OUTPUT_FORMATS = _RENDER_FUNCTIONS.keys()
 
 def render(text, output_file, **kwargs):
-    filename = None
     if isinstance(output_file, (str, unicode)):
-        filename = output_file
-    else:
-        filename = output_file.name
+        output_file = open(output_file, "wb")
 
-    output_ext = os.path.splitext(filename.lower())[1].lstrip(os.path.extsep)
+    output_ext = os.path.splitext(output_file.name.lower())[1].lstrip(os.path.extsep)
 
     ## The filename extension is the best guess if the user has not provided the
     ## output format explicitly.
