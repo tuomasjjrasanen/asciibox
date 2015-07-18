@@ -19,23 +19,39 @@ from __future__ import absolute_import
 import math
 import os.path
 
-_backend = None
+BACKENDS = []
+
+_last_backend_import_error = None
 try:
     import cairo
     import pango
     import pangocairo
-    _backend = "pangocairo"
-except ImportError:
+except ImportError, e:
+    _last_backend_import_error = e
+else:
+    BACKENDS.append("pangocairo")
+
+try:
     from PIL import Image
     from PIL import ImageDraw
     from PIL import ImageFont
-    _backend = "pillow"
+except ImportError, e:
+    _last_backend_import_error = e
+else:
+    BACKENDS.append("pillow")
+
+if not BACKENDS:
+    raise _last_backend_import_error
+
+default_backend = BACKENDS[0]
 
 from ._error import OutputFormatError
 
 __all__ = [
-    "render",
+    "BACKENDS",
     "OUTPUT_FORMATS",
+    "default_backend",
+    "render",
 ]
 
 def _pangocairo_draw_line(context, line):
@@ -220,13 +236,21 @@ _RENDER_FUNCTIONS = {
     "pillow": {
         "png": _pillow_render_png,
     }
-}[_backend]
-OUTPUT_FORMATS = _RENDER_FUNCTIONS.keys()
+}
+
+OUTPUT_FORMATS = _RENDER_FUNCTIONS[default_backend].keys()
 
 def _render(text, output_file, **kwargs):
+    backend = kwargs.pop("backend", default_backend)
+
+    try:
+        render_functions = _RENDER_FUNCTIONS[backend]
+    except KeyError:
+        raise BackendError(backend)
+
     output_format = kwargs.pop("output_format", None)
     try:
-        render_function = _RENDER_FUNCTIONS[output_format]
+        render_function = render_functions[output_format]
     except KeyError:
         raise OutputFormatError(output_format)
     figure = _Figure(text)
