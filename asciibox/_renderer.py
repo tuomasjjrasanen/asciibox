@@ -20,6 +20,7 @@ import math
 import os.path
 
 from PIL import Image
+from PIL import ImageColor
 from PIL import ImageDraw
 from PIL import ImageFont
 
@@ -30,14 +31,26 @@ __all__ = [
     "render",
 ]
 
-def _pillow_render_png(figure, output_file, scale_x=8, scale_y=8):
+def _pillow_render_png(figure, output_file, scale_x=8, scale_y=8,
+                       bg_rgb="#ffffff", fg_rgb="#000000",
+                       bg_opacity=0.0, fg_opacity=1.0):
     rescale_factor = 8
     scale_x *= rescale_factor
     scale_y *= rescale_factor
 
-    image_width = int(math.ceil(figure.width * scale_x))
-    image_height = int(math.ceil(figure.height * scale_y))
-    image = Image.new("RGBA", (image_width, image_height), (255, 255, 255, 0))
+    bg_opacity = min(1.0, max(0.0, bg_opacity))
+    fg_opacity = min(1.0, max(0.0, fg_opacity))
+
+    bg_alpha = int(round(bg_opacity * 255))
+    fg_alpha = int(round(fg_opacity * 255))
+
+    bg_rgba = ImageColor.getrgb(bg_rgb) + (bg_alpha,)
+    fg_rgba = ImageColor.getrgb(fg_rgb) + (fg_alpha,)
+
+    image_size = (int(math.ceil(figure.width * scale_x)),
+                  int(math.ceil(figure.height * scale_y)))
+
+    image = Image.new("RGBA", image_size, bg_rgba)
     draw = ImageDraw.Draw(image)
 
     font_filepath = os.path.join(os.path.dirname(__file__), "data",
@@ -51,15 +64,15 @@ def _pillow_render_png(figure, output_file, scale_x=8, scale_y=8):
     for line in figure.lines:
         x0, y0, x1, y1 = line
         draw.line((scale_x * x0, scale_y * y0, scale_x * x1, scale_y * y1),
-                  fill=(0, 0, 0, 255), width=rescale_factor)
+                  fill=fg_rgba, width=rescale_factor)
 
     for text in figure.texts:
         pos, string = text
         x, y = pos
-        draw.text((scale_x * x, scale_y * y), string, font=font, fill=(0, 0, 0, 255))
+        draw.text((scale_x * x, scale_y * y), string, font=font, fill=fg_rgba)
 
-    final_size = (image_width // rescale_factor, image_height // rescale_factor)
-    image = image.resize(final_size, Image.LANCZOS)
+    image_size = [v // rescale_factor for v in image_size]
+    image = image.resize(image_size, Image.LANCZOS)
 
     image.save(output_file, "PNG")
 
