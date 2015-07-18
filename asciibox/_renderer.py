@@ -19,9 +19,17 @@ from __future__ import absolute_import
 import math
 import os.path
 
-import cairo
-import pango
-import pangocairo
+_backend = None
+try:
+    import cairo
+    import pango
+    import pangocairo
+    _backend = "pangocairo"
+except ImportError:
+    from PIL import Image
+    from PIL import ImageDraw
+    from PIL import ImageFont
+    _backend = "pillow"
 
 from ._error import OutputFormatError
 
@@ -73,6 +81,31 @@ def _pangocairo_render_png(figure, output_file, scale_x=8, scale_y=8):
     _pangocairo_render_surface(figure, surface, scale_x, scale_y)
 
     surface.write_to_png(output_file)
+
+def _pillow_render_png(figure, output_file, scale_x=8, scale_y=8):
+    image_width = int(math.ceil(figure.width * scale_x))
+    image_height = int(math.ceil(figure.height * scale_y))
+    image = Image.new("RGBA", (image_width, image_height), (255, 255, 255, 0))
+    draw = ImageDraw.Draw(image)
+
+    font_filepath = os.path.join(os.path.dirname(__file__), "data",
+                                 "DejaVuSansMono.ttf")
+    font_size = int(math.ceil(2 * min(scale_x, scale_y)))
+    try:
+        font = ImageFont.truetype(font_filepath, font_size)
+    except IOError:
+        font = ImageFont.load_default()
+
+    for line in figure.lines:
+        x0, y0, x1, y1 = line
+        draw.line((scale_x * x0, scale_y * y0, scale_x * x1, scale_y * y1), fill=(0, 0, 0, 255))
+
+    for text in figure.texts:
+        pos, string = text
+        x, y = pos
+        draw.text((scale_x * x, scale_y * y), string, font=font, fill=(0, 0, 0, 255))
+
+    image.save(output_file, "PNG")
 
 class _TextRect:
 
@@ -180,9 +213,14 @@ class _Figure:
         return self.__texts
 
 _RENDER_FUNCTIONS = {
-    "png": _pangocairo_render_png,
-    "svg": _pangocairo_render_svg,
-}
+    "pangocairo": {
+        "png": _pangocairo_render_png,
+        "svg": _pangocairo_render_svg,
+    },
+    "pillow": {
+        "png": _pillow_render_png,
+    }
+}[_backend]
 OUTPUT_FORMATS = _RENDER_FUNCTIONS.keys()
 
 def _render(text, output_file, **kwargs):
