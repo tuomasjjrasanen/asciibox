@@ -130,18 +130,34 @@ class _Figure:
                 lines.append((x + 0, y + 1, x + 2, y + 1))
             elif char == '|':
                 lines.append((x + 1, y + 0, x + 1, y + 2))
+            elif char == '<' and right_char == '-' and left_char == '+':
+                lines.append((x - 1, y + 1, x + 1, y + 0))
+                lines.append((x - 1, y + 1, x + 2, y + 1))
+                lines.append((x - 1, y + 1, x + 1, y + 2))
             elif char == '<' and right_char == '-':
                 lines.append((x + 0, y + 1, x + 2, y + 0))
                 lines.append((x + 0, y + 1, x + 2, y + 1))
                 lines.append((x + 0, y + 1, x + 2, y + 2))
+            elif char == '>' and left_char == '-' and right_char == '+':
+                lines.append((x + 1, y + 0, x + 3, y + 1))
+                lines.append((x + 0, y + 1, x + 3, y + 1))
+                lines.append((x + 1, y + 2, x + 3, y + 1))
             elif char == '>' and left_char == '-':
                 lines.append((x + 0, y + 0, x + 2, y + 1))
                 lines.append((x + 0, y + 1, x + 2, y + 1))
                 lines.append((x + 0, y + 2, x + 2, y + 1))
+            elif char == '^' and down_char == '|' and up_char == '+':
+                lines.append((x + 0, y + 1, x + 1, y - 1))
+                lines.append((x + 1, y + 2, x + 1, y - 1))
+                lines.append((x + 2, y + 1, x + 1, y - 1))
             elif char == '^' and down_char == '|':
                 lines.append((x + 0, y + 2, x + 1, y + 0))
                 lines.append((x + 1, y + 2, x + 1, y + 0))
                 lines.append((x + 2, y + 2, x + 1, y + 0))
+            elif char == 'v' and up_char == '|' and down_char == '+':
+                lines.append((x + 0, y + 1, x + 1, y + 3))
+                lines.append((x + 1, y + 0, x + 1, y + 3))
+                lines.append((x + 2, y + 1, x + 1, y + 3))
             elif char == 'v' and up_char == '|':
                 lines.append((x + 0, y + 0, x + 1, y + 2))
                 lines.append((x + 1, y + 0, x + 1, y + 2))
