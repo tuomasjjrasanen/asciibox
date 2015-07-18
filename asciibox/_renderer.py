@@ -31,6 +31,10 @@ __all__ = [
 ]
 
 def _pillow_render_png(figure, output_file, scale_x=8, scale_y=8):
+    rescale_factor = 8
+    scale_x *= rescale_factor
+    scale_y *= rescale_factor
+
     image_width = int(math.ceil(figure.width * scale_x))
     image_height = int(math.ceil(figure.height * scale_y))
     image = Image.new("RGBA", (image_width, image_height), (255, 255, 255, 0))
@@ -46,12 +50,16 @@ def _pillow_render_png(figure, output_file, scale_x=8, scale_y=8):
 
     for line in figure.lines:
         x0, y0, x1, y1 = line
-        draw.line((scale_x * x0, scale_y * y0, scale_x * x1, scale_y * y1), fill=(0, 0, 0, 255))
+        draw.line((scale_x * x0, scale_y * y0, scale_x * x1, scale_y * y1),
+                  fill=(0, 0, 0, 255), width=rescale_factor)
 
     for text in figure.texts:
         pos, string = text
         x, y = pos
         draw.text((scale_x * x, scale_y * y), string, font=font, fill=(0, 0, 0, 255))
+
+    final_size = (image_width // rescale_factor, image_height // rescale_factor)
+    image = image.resize(final_size, Image.LANCZOS)
 
     image.save(output_file, "PNG")
 
