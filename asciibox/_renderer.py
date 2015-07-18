@@ -186,20 +186,21 @@ _RENDER_FUNCTIONS = {
 }
 OUTPUT_FORMATS = _RENDER_FUNCTIONS.keys()
 
-def _render(text, output_file, **kwargs):
-    output_format = kwargs.pop("output_format", None)
+def render(text, output_file, **kwargs):
+    filename = None
+    if isinstance(output_file, (str, unicode)):
+        filename = output_file
+    else:
+        filename = output_file.name
+
+    output_ext = os.path.splitext(filename.lower())[1].lstrip(os.path.extsep)
+
+    ## The filename extension is the best guess if the user has not provided the
+    ## output format explicitly.
+    output_format = kwargs.pop("output_format", output_ext)
     try:
         render_function = _RENDER_FUNCTIONS[output_format]
     except KeyError:
         raise OutputFormatError(output_format)
     figure = _Figure(text)
     render_function(figure, output_file, **kwargs)
-
-def render(text, output_file, **kwargs):
-    if isinstance(output_file, (str, unicode)):
-        kwargs.setdefault("output_format",
-                          os.path.splitext(output_file)[1].lstrip(os.path.extsep))
-        with open(output_file, "wb") as f:
-            _render(text, f, **kwargs)
-
-    _render(text, output_file, **kwargs)
