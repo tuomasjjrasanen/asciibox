@@ -18,6 +18,7 @@ from __future__ import absolute_import
 
 import math
 import os.path
+import xml.sax.saxutils
 
 from PIL import Image
 from PIL import ImageColor
@@ -30,6 +31,35 @@ __all__ = [
     "OUTPUT_FORMATS",
     "render",
 ]
+
+def _render_svg(figure, output_file, scale_x=8, scale_y=8,
+                bg_rgb="#ffffff", fg_rgb="#000000",
+                bg_opacity=0.0, fg_opacity=1.0):
+
+    fg_opacity = min(1.0, max(0.0, float(fg_opacity)))
+
+    image_width = int(math.ceil(figure.width * scale_x))
+    image_height = int(math.ceil(figure.height * scale_y))
+    font_size = int(math.ceil(2 * min(scale_x, scale_y)))
+
+    output_file.write('<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n')
+    output_file.write('<svg width="%d" height="%d" version="1.1" xmlns="http://www.w3.org/2000/svg">\n'
+                      % (image_width, image_height))
+
+    for line in figure.lines:
+        x1, y1, x2, y2 = line
+        output_file.write('    <line x1="%d" y1="%d" x2="%d" y2="%d" stroke="%s" opacity="%f" stroke-width="1" />\n'
+                          % (x1 * scale_x, y1 * scale_y, x2 * scale_x, y2 * scale_y, fg_rgb, fg_opacity))
+
+    for text in figure.texts:
+        pos, string = text
+        x, y = pos
+        output_file.write('    <text x="%d" y="%d" font-family="monospace" font-size="%d" stroke="%s" opacity="%f">'
+                          % (x * scale_x, y * scale_y + font_size, font_size, fg_rgb, fg_opacity))
+        output_file.write(xml.sax.saxutils.escape(string))
+        output_file.write('</text>\n')
+
+    output_file.write('</svg>\n')
 
 def _pillow_render_png(figure, output_file, scale_x=8, scale_y=8,
                        bg_rgb="#ffffff", fg_rgb="#000000",
@@ -199,6 +229,7 @@ class _Figure:
 
 _RENDER_FUNCTIONS = {
     "png": _pillow_render_png,
+    "svg": _render_svg,
 }
 OUTPUT_FORMATS = _RENDER_FUNCTIONS.keys()
 
