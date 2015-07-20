@@ -59,6 +59,11 @@ def _render_svg(figure, output_file, scale_x=8, scale_y=8,
         output_file.write(xml.sax.saxutils.escape(string))
         output_file.write('</text>\n')
 
+    for polygon in figure.polygons:
+        points = ["%d,%d" % (scale_x * x, scale_y * y) for x, y in polygon]
+        output_file.write('    <polygon points="%s" fill="%s" stroke="%s" stroke-width="1" />\n'
+                          % (" ".join(points), fg_rgb, fg_rgb))
+
     output_file.write('</svg>\n')
 
 def _pillow_render_png(figure, output_file, scale_x=8, scale_y=8,
@@ -100,6 +105,10 @@ def _pillow_render_png(figure, output_file, scale_x=8, scale_y=8,
         pos, string = text
         x, y = pos
         draw.text((scale_x * x, scale_y * y), string, font=font, fill=fg_rgba)
+
+    for polygon in figure.polygons:
+        draw.polygon([(scale_x * x, scale_y * y) for x, y in polygon],
+                     fill=fg_rgba, outline=fg_rgba)
 
     image_size = [v // rescale_factor for v in image_size]
     image = image.resize(image_size, Image.LANCZOS)
@@ -147,6 +156,7 @@ class _Figure:
 
         texts = []
         lines = []
+        polygons = []
 
         textrect = _TextRect(text)
 
@@ -161,37 +171,25 @@ class _Figure:
             elif char == '|':
                 lines.append((x + 1, y + 0, x + 1, y + 2))
             elif char == '<' and right_char == '-' and left_char == '+':
-                lines.append((x - 1, y + 1, x + 1, y + 0))
+                polygons.append([(x - 1, y + 1), (x + 1, y + 2), (x + 1, y + 0)])
                 lines.append((x - 1, y + 1, x + 2, y + 1))
-                lines.append((x - 1, y + 1, x + 1, y + 2))
             elif char == '<' and right_char == '-':
-                lines.append((x + 0, y + 1, x + 2, y + 0))
-                lines.append((x + 0, y + 1, x + 2, y + 1))
-                lines.append((x + 0, y + 1, x + 2, y + 2))
+                polygons.append([(x + 0, y + 1), (x + 2, y + 2), (x + 2, y + 0)])
             elif char == '>' and left_char == '-' and right_char == '+':
-                lines.append((x + 1, y + 0, x + 3, y + 1))
-                lines.append((x + 0, y + 1, x + 3, y + 1))
-                lines.append((x + 1, y + 2, x + 3, y + 1))
+                polygons.append([(x + 3, y + 1), (x + 1, y + 0), (x + 1, y + 2)])
+                lines.append((x + 3, y + 1, x + 0, y + 1))
             elif char == '>' and left_char == '-':
-                lines.append((x + 0, y + 0, x + 2, y + 1))
-                lines.append((x + 0, y + 1, x + 2, y + 1))
-                lines.append((x + 0, y + 2, x + 2, y + 1))
+                polygons.append([(x + 2, y + 1), (x + 0, y + 0), (x + 0, y + 2)])
             elif char == '^' and down_char == '|' and up_char == '+':
-                lines.append((x + 0, y + 1, x + 1, y - 1))
-                lines.append((x + 1, y + 2, x + 1, y - 1))
-                lines.append((x + 2, y + 1, x + 1, y - 1))
+                polygons.append([(x + 1, y - 1), (x + 0, y + 1), (x + 2, y + 1)])
+                lines.append((x + 1, y - 1, x + 1, y + 2))
             elif char == '^' and down_char == '|':
-                lines.append((x + 0, y + 2, x + 1, y + 0))
-                lines.append((x + 1, y + 2, x + 1, y + 0))
-                lines.append((x + 2, y + 2, x + 1, y + 0))
+                polygons.append([(x + 1, y + 0), (x + 0, y + 2), (x + 2, y + 2)])
             elif char == 'v' and up_char == '|' and down_char == '+':
-                lines.append((x + 0, y + 1, x + 1, y + 3))
-                lines.append((x + 1, y + 0, x + 1, y + 3))
-                lines.append((x + 2, y + 1, x + 1, y + 3))
+                polygons.append([(x + 1, y + 3), (x + 2, y + 1), (x + 0, y + 1)])
+                lines.append((x + 1, y + 3, x + 1, y + 0))
             elif char == 'v' and up_char == '|':
-                lines.append((x + 0, y + 0, x + 1, y + 2))
-                lines.append((x + 1, y + 0, x + 1, y + 2))
-                lines.append((x + 2, y + 0, x + 1, y + 2))
+                polygons.append([(x + 1, y + 2), (x + 2, y + 0), (x + 0, y + 0)])
             elif char == '+':
                 if right_char == '-':
                     lines.append((x + 1, y + 1, x + 2, y + 1))
@@ -210,6 +208,7 @@ class _Figure:
         self.__height = 2 * textrect.height
         self.__lines = lines
         self.__texts = texts
+        self.__polygons = polygons
 
     @property
     def width(self):
@@ -226,6 +225,10 @@ class _Figure:
     @property
     def texts(self):
         return self.__texts
+
+    @property
+    def polygons(self):
+        return self.__polygons
 
 _RENDER_FUNCTIONS = {
     "png": _pillow_render_png,
