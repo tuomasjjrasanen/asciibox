@@ -10,9 +10,81 @@ License:  GPLv3+ (see COPYING for details)
 Homepage: http://tjjr.fi/sw/asciibox/
 Sources:  http://github.com/tuomasjjrasanen/asciibox/
 
+Dependencies
+============
+
+- Python 2.7 or Python 2.6
+- docutils
+- pillow (a friendly PIL fork)
+
+
+Installation
+============
+
+There are multiple different ways to install asciibox,
+
+The traditional way
+-------------------
+
+The traditional way makes an system-wide installation. If you choose go this
+route, you need to ensure all dependencies are available too.
+
+  python setup.py build
+  sudo python setup.py install
+
+Using virtualenv and pip
+------------------------
+
+With virtualenv and pip, you can install asciibox and all its dependencies to an
+isolated Python environment. This is especially useful if you cannot or do not
+want to make an system-wide installation. It is also useful, if your system does
+not have all dependencies available.
+
+  virtualenv env
+  source env/bin/activate
+  python setup.py sdist
+  pip install dist/asciibox-0.3.1.tar.gz
+
+Using virtualenv and pip, install from PyPi
+-------------------------------------------
+
+You can also install asciibox from PyPi:
+
+  virtualenv env
+  source env/bin/activate
+  pip install asciibox==0.3.1
+
+
 Command line usage
 ==================
 
 To render a text file as a PNG file, run:
 
-  python asciibox.py -i doc/examples/fig.txt -o fig.png
+  asciibox -i doc/examples/fig.txt -o fig.png
+
+To render a text file as a SVG file, run:
+
+  asciibox -i doc/examples/fig.txt -o fig.svg
+
+Use --help to display all available options.
+
+
+reStructuredText markup extension
+=================================
+
+The package contains also a reStructuredText extension which can be registered
+with reStructuredText as follows:
+
+  import asciibox
+  asciibox.register_rst_directive()
+
+Then the registered directive can be used to render an image with following
+markup:
+
+  .. asciibox:: fig1.png
+
+     +----+
+     |    |
+     |    +<--
+     |    |
+     +----+
