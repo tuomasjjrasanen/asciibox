@@ -25,7 +25,6 @@ import sys
 
 import asciibox
 
-VERSION = "0.3.1"
 DESCRIPTION = "Render ASCII boxes and arrows as images."
 AUTHOR = "Tuomas Räsänen"
 EMAIL = "tuomasjjrasanen@tjjr.fi"
@@ -35,7 +34,7 @@ License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
 This is free software: you are free to change and redistribute it.
 There is NO WARRANTY, to the extent permitted by law.
 
-Written by %s <%s>.""" % (VERSION, AUTHOR, AUTHOR, EMAIL)
+Written by %s <%s>.""" % (asciibox.VERSION, AUTHOR, AUTHOR, EMAIL)
 
 def _parse_args(argv):
     render_options = {}
