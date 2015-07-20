@@ -1,0 +1,39 @@
+===================================================
+ ASCII Box NEWS -- history of user-visible changes
+===================================================
+
+Release x.y.z
+=============
+
+- Add NEWS
+- Split the contents of asciibox.py into a separate script and a package
+- Switch the rendering backend from Cairo to PIL
+- Add install requirements to ease installation from PyPi with pip
+- Fix arrow rendering when they point to a joint (+)
+
+Release 0.3.1
+=============
+
+- Fix the version number scheme
+- Fix the handling of 'scale' option of reStructuredText directive
+
+Release 0.3
+===========
+
+- Add the reStructuredText extension to the asciibox module
+- Add a function for registering the reStructuredText extension
+
+Release 0.2
+===========
+
+- Add support for text
+- Add command line interface
+- Add support for SVG rendering
+- Add experimental reStructuredText support
+- Switch the rendering backend from PIL to Cairo
+
+Release 0.1
+===========
+
+- Add support for basic "boxes and arrows" syntax
+- Add support for PNG rendering using PIL
