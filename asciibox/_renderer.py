@@ -54,7 +54,7 @@ def _render_svg(figure, output_file, scale_x=8, scale_y=8,
     for text in figure.texts:
         pos, string = text
         x, y = pos
-        output_file.write('    <text x="%d" y="%d" font-family="monospace" font-size="%d" stroke="%s" opacity="%f">'
+        output_file.write('    <text x="%d" y="%d" font-family="DejaVuSansMono, monospace" font-size="%d" stroke="%s" opacity="%f">'
                           % (x * scale_x, y * scale_y + font_size, font_size, fg_rgb, fg_opacity))
         output_file.write(xml.sax.saxutils.escape(string))
         output_file.write('</text>\n')
