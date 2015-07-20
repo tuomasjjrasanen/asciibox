@@ -5,7 +5,7 @@
 ASCII Box is a Python program which renders "boxes and arrows" text diagrams as
 image files. Currently ASCII Box can render PNG and SVG files.
 
-Version:  0.3.1
+Version:  0.4.0
 License:  GPLv3+ (see COPYING for details)
 Homepage: http://tjjr.fi/sw/asciibox/
 Sources:  http://github.com/tuomasjjrasanen/asciibox/
@@ -43,7 +43,7 @@ not have all dependencies available.
   virtualenv env
   source env/bin/activate
   python setup.py sdist
-  pip install dist/asciibox-0.3.1.tar.gz
+  pip install dist/asciibox-0.4.0.tar.gz
 
 Using virtualenv and pip, install from PyPi
 -------------------------------------------
@@ -52,7 +52,7 @@ You can also install asciibox from PyPi:
 
   virtualenv env
   source env/bin/activate
-  pip install asciibox==0.3.1
+  pip install asciibox==0.4.0
 
 
 Command line usage

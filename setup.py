@@ -2,7 +2,7 @@
 from distutils.core import setup
 
 setup(name='asciibox',
-      version='0.3.1',
+      version='0.4.0',
       description='Render ASCII boxes and arrows as images.',
       author='Tuomas Räsänen',
       author_email='tuomasjjrasanen@tjjr.fi',
@@ -14,7 +14,7 @@ setup(name='asciibox',
       requires=['docutils'],
       install_requires=['docutils', 'pillow'],
       platforms=['Linux'],
-      download_url='http://tjjr.fi/sw/asciibox/releases/asciibox-0.3.1.tar.gz',
+      download_url='http://tjjr.fi/sw/asciibox/releases/asciibox-0.4.0.tar.gz',
       classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",

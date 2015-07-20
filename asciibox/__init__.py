@@ -41,7 +41,7 @@ from ._renderer import OUTPUT_FORMATS
 from ._renderer import render
 from ._rst import register_rst_directive
 
-VERSION = "0.3.1"
+VERSION = "0.4.0"
 
 __all__ = [
     "Error",
